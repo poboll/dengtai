@@ -1,0 +1,63 @@
+.detailCard {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 42px rgba(26, 26, 44, 0.08);
+}
+
+.heroImage {
+  width: 100%;
+  border-radius: 28px;
+  max-height: 360px;
+  object-fit: cover;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--color-text-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 18px;
+}
+
+.tagList {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.body {
+  background: rgba(255, 248, 238, 0.8);
+  border-radius: 24px;
+  padding: 28px;
+  line-height: 1.7;
+  color: var(--color-text);
+  white-space: pre-line;
+}

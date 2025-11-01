@@ -1,0 +1,212 @@
+import { FormEvent, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import type { LoginRequest } from "@/types/auth";
+import { authService } from "@/services/authService";
+import styles from "./LoginPage.module.css";
+
+const identifierOptions = [
+  { label: "手机号", value: "PHONE" },
+  { label: "用户名", value: "USERNAME" },
+  { label: "邮箱", value: "EMAIL" }
+] as const;
+
+type LocationState = {
+  from?: string;
+};
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isLoading, user } = useAuth();
+  const [identifierType, setIdentifierType] = useState<LoginRequest["identifierType"]>("USERNAME");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginMethod, setLoginMethod] = useState<"PASSWORD" | "CODE">("PASSWORD");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  const from = (location.state as LocationState | undefined)?.from ?? "/";
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate(from, { replace: true });
+    }
+  }, [isLoading, user, navigate, from]);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = window.setTimeout(() => setCountdown(prev => prev - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [countdown]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const payload: LoginRequest =
+        loginMethod === "PASSWORD"
+          ? { identifierType, identifier, password }
+          : { identifierType, identifier, code };
+      await login(payload);
+      navigate(from, { replace: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "登录失败，请稍后重试";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSendCode = async () => {
+    if (!identifier) {
+      setError("请先填写账号信息");
+      return;
+    }
+    setError(null);
+    setSendingCode(true);
+    try {
+      const response = await authService.sendCode({
+        scene: "LOGIN",
+        identifierType,
+        identifier
+      });
+      setCountdown(Math.max(1, response.expireSeconds ?? 300));
+    } catch (err) {
+      const info = err instanceof Error ? err.message : "验证码发送失败";
+      setError(info);
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const isDisabled = submitting || !identifier || (loginMethod === "PASSWORD" ? !password : !code);
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <div className={styles.titleBlock}>
+          <h1 className={styles.title}>欢迎回来</h1>
+          <p className={styles.subtitle}>登录灯塔，与知识发光</p>
+        </div>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="identifierType">
+              账号类型
+            </label>
+            <select
+              id="identifierType"
+              className={styles.select}
+              value={identifierType}
+              onChange={event => setIdentifierType(event.target.value as LoginRequest["identifierType"])}
+            >
+              {identifierOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="loginMethod">
+              登录方式
+            </label>
+            <select
+              id="loginMethod"
+              className={styles.select}
+              value={loginMethod}
+              onChange={event => setLoginMethod(event.target.value as "PASSWORD" | "CODE")}
+            >
+              <option value="PASSWORD">密码登录</option>
+              <option value="CODE">验证码登录</option>
+            </select>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="identifier">
+              {identifierType === "PHONE" ? "手机号" : identifierType === "EMAIL" ? "邮箱" : "用户名"}
+            </label>
+            <input
+              id="identifier"
+              className={styles.input}
+              value={identifier}
+              onChange={event => setIdentifier(event.target.value)}
+              placeholder="请输入账号"
+              type={identifierType === "PHONE" ? "tel" : identifierType === "EMAIL" ? "email" : "text"}
+              autoComplete={identifierType === "PHONE" ? "tel" : identifierType === "EMAIL" ? "email" : "username"}
+            />
+          </div>
+
+          {loginMethod === "PASSWORD" ? (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="password">
+                密码
+              </label>
+              <input
+                id="password"
+                className={styles.input}
+                type="password"
+                value={password}
+                onChange={event => setPassword(event.target.value)}
+                placeholder="请输入密码"
+                autoComplete="current-password"
+              />
+            </div>
+          ) : (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="code">
+                验证码
+              </label>
+              <div className={styles.codeRow}>
+                <input
+                  id="code"
+                  className={styles.input}
+                  value={code}
+                  onChange={event => setCode(event.target.value)}
+                  placeholder="请输入验证码"
+                  autoComplete="one-time-code"
+                />
+                <button
+                  type="button"
+                  className={styles.codeButton}
+                  disabled={sendingCode || countdown > 0}
+                  onClick={handleSendCode}
+                >
+                  {countdown > 0 ? `${countdown}s` : "获取验证码"}
+                </button>
+              </div>
+              <span className={styles.tips}>验证码用于校验登录，不需要输入密码。</span>
+            </div>
+          )}
+
+          {error ? <div className={styles.error}>{error}</div> : null}
+
+          <div className={styles.actions}>
+            <button type="submit" className={styles.submitButton} disabled={isDisabled}>
+              {submitting ? "登录中..." : "登录"}
+            </button>
+            <div className={styles.switchLink}>
+              还没有账号？
+              <button
+                type="button"
+                style={{ background: "none", border: "none", color: "var(--color-primary-strong)", fontWeight: 600, cursor: "pointer" }}
+                onClick={() => navigate("/register", { state: { from } })}
+              >
+                前往注册
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
