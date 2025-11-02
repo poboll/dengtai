@@ -1,6 +1,7 @@
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import SectionHeader from "@/components/common/SectionHeader";
+import TagInput from "@/components/common/TagInput";
 import Select from "@/components/common/Select";
 import { useState } from "react";
 import AuthStatus from "@/features/auth/AuthStatus";
@@ -10,6 +11,7 @@ const CreatePage = () => {
   const [type, setType] = useState("图文笔记");
   const [category, setCategory] = useState("编程开发");
   const [series, setSeries] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
   return (
     <AppLayout
       header={
@@ -57,8 +59,8 @@ const CreatePage = () => {
             label="关联专栏"
             value={series}
             onChange={setSeries}
+            placeholder="选择一个专栏"
             options={[
-              { label: "选择一个专栏", value: "" },
               { label: "AI Coding 体验之旅", value: "coding" },
               { label: "产品实践工作坊", value: "product" }
             ]}
@@ -92,7 +94,12 @@ const CreatePage = () => {
             <label className={styles.label} htmlFor="tags">
               标签
             </label>
-            <input id="tags" className={styles.input} placeholder="输入标签按回车添加" />
+            <TagInput
+              id="tags"
+              value={tags}
+              onChange={setTags}
+              placeholder="输入标签后按回车"
+            />
           </div>
           <div className={`${styles.field} ${styles.fullWidth}`}>
             <div className={styles.toggle}>

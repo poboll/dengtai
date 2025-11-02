@@ -20,6 +20,7 @@ export type MainHeaderProps = {
   user?: {
     name: string;
     alias?: string;
+    avatarUrl?: string;
   };
 };
 
@@ -52,7 +53,7 @@ const MainHeader = ({ headline, subtitle, tabs, filters, rightSlot, children, us
         </div>
         <div className={styles.extras}>
           {rightSlot}
-          {user ? <UserBadge name={user.name} alias={user.alias} /> : null}
+          {user ? <UserBadge name={user.name} alias={user.alias} avatarUrl={user.avatarUrl} /> : null}
         </div>
       </div>
 

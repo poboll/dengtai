@@ -27,6 +27,8 @@ export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions
   const baseUrl = getBaseUrl();
   const { method = "GET", headers = {}, body, accessToken, signal } = options;
 
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+
   const getStoredAccessToken = (): string | null => {
     if (typeof window === "undefined") return null;
     try {
@@ -40,7 +42,7 @@ export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions
   };
 
   const mergedHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...headers
   };
 
@@ -49,12 +51,30 @@ export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions
     mergedHeaders.Authorization = `Bearer ${token}`;
   }
 
+  // 若服务端启用了 CSRF 防护（如 Spring Security），尝试从 Cookie 中读取 XSRF-TOKEN 并随非幂等请求附加到头部
+  const methodUpper = method.toUpperCase();
+  const isIdempotent = methodUpper === "GET" || methodUpper === "HEAD" || methodUpper === "OPTIONS";
+  if (!isIdempotent && typeof document !== "undefined") {
+    try {
+      const cookies = document.cookie ?? "";
+      const match = cookies.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+      const xsrfToken = match ? decodeURIComponent(match[1]) : null;
+      if (xsrfToken && !("X-XSRF-TOKEN" in mergedHeaders)) {
+        mergedHeaders["X-XSRF-TOKEN"] = xsrfToken;
+      }
+    } catch {
+      // 忽略读取失败，保持无 header
+    }
+  }
+
   const url = baseUrl ? `${baseUrl}${path}` : path;
   const response = await fetch(url, {
     method,
     headers: mergedHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-    signal
+    body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
+    signal,
+    // 确保在代理或跨域场景下也能携带 Cookie（包括可能的 XSRF-TOKEN）
+    credentials: "include"
   });
 
   if (!response.ok) {

@@ -24,12 +24,22 @@ export type RegisterRequest = {
 };
 
 // 与后端保持一致：登录/注册返回 AuthResponse，包含用户信息与令牌
+import type { Gender } from "@/types/profile";
+
 export type AuthUserResponse = {
   id: number;
   nickname: string;
   avatar: string;
   phone: string;
-  email: string;
+  email?: string;
+  // 新增字段，与后端 auth/me 响应保持一致
+  zhId?: string;
+  birthday?: string; // LocalDate → 期望 yyyy-MM-dd 字符串
+  school?: string;
+  bio?: string;
+  gender?: Gender; // "MALE" | "FEMALE" | "OTHER" | "UNKNOWN"
+  // 兼容可能的扩展
+  skills?: string[];
 };
 
 export type TokenResponse = {

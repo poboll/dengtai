@@ -30,6 +30,7 @@ const AuthStatus = () => {
   }
 
   const displayName = user.nickname || "用户";
+  const avatarUrl = user.avatar || undefined;
 
   const handleLogout = async () => {
     try {
@@ -41,7 +42,7 @@ const AuthStatus = () => {
 
   return (
     <div className={styles.wrapper}>
-      <UserBadge name={displayName} />
+      <UserBadge name={displayName} avatarUrl={avatarUrl} />
       <button type="button" className={styles.logoutButton} onClick={handleLogout}>
         退出
       </button>

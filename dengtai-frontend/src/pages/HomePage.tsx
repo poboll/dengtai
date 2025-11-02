@@ -2,22 +2,20 @@ import { useMemo, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import CourseCard from "@/components/cards/CourseCard";
-import { categories, mockContents, tabFilters } from "@/data/content";
+import { categories, mockContents } from "@/data/content";
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./HomePage.module.css";
 
 const HomePage = () => {
   // 默认展示全部：不选中任何具体分类
   const [activeCategory, setActiveCategory] = useState<string>("");
-  const [activeFilter, setActiveFilter] = useState(tabFilters[0].id);
+  // 去除“最新/最热”筛选
 
   const filteredContents = useMemo(() => {
+    // “推荐”视为展示全部内容；其他分类按匹配过滤，不做排序
     const base = !activeCategory ? mockContents : mockContents.filter(item => item.category === activeCategory);
-    if (activeFilter === "popular") {
-      return [...base].sort((a, b) => b.views - a.views);
-    }
-    return [...base].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [activeCategory, activeFilter]);
+    return base;
+  }, [activeCategory]);
 
   // 仅保留瀑布流 Feed 展示全部内容
 
@@ -25,18 +23,13 @@ const HomePage = () => {
     <AppLayout
       header={
         <MainHeader
-          headline="灯塔 · 让知识发光"
-          subtitle="精选实用好课，陪你成为更好的自己"
+          headline="灯塔 · 让思想有温度，让知识会发光"
           tabs={categories.map(cat => ({
             id: cat,
             label: cat,
-            active: activeCategory === cat,
-            onSelect: setActiveCategory
-          }))}
-          filters={tabFilters.map(filter => ({
-            ...filter,
-            active: activeFilter === filter.id,
-            onSelect: setActiveFilter
+            // “推荐”激活态取决于 activeCategory 为空，其余按分类匹配
+            active: cat === "推荐" ? activeCategory === "" : activeCategory === cat,
+            onSelect: (id: string) => setActiveCategory(id === "推荐" ? "" : id)
           }))}
           rightSlot={<AuthStatus />}
         />

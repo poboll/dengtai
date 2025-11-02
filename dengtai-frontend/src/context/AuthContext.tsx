@@ -36,6 +36,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "dengtai_auth_tokens";
+const USER_STORAGE_KEY = "dengtai_current_user";
 
 const readStoredTokens = (): AuthTokens | null => {
   if (typeof window === "undefined") {
@@ -63,6 +64,32 @@ const persistTokens = (tokens: AuthTokens | null) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
 };
 
+const readStoredUser = (): AuthenticatedUser | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthenticatedUser;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const persistUser = (user: AuthenticatedUser | null) => {
+  if (typeof window === "undefined") return;
+  if (!user) {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    return;
+  }
+  try {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  } catch {
+    // ignore
+  }
+};
+
 const parseInstantToMillis = (value: string): number => {
   const numeric = Number(value);
   if (!Number.isNaN(numeric)) {
@@ -84,7 +111,7 @@ type AuthProviderProps = {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [tokens, setTokens] = useState<AuthTokens | null>(() => readStoredTokens());
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [user, setUser] = useState<AuthenticatedUser | null>(() => readStoredUser());
   const [isLoading, setIsLoading] = useState<boolean>(!!tokens);
   const fetchingRef = useRef<Promise<void> | null>(null);
 
@@ -92,11 +119,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const profile = await authService.fetchCurrentUser(accessToken);
       setUser(profile);
+      persistUser(profile);
     } catch (error) {
       console.error("获取用户信息失败", error);
       setUser(null);
       setTokens(null);
       persistTokens(null);
+      persistUser(null);
     }
   }, []);
 
@@ -124,6 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setTokens(nextTokens);
       persistTokens(nextTokens);
       setUser(response.user);
+      persistUser(response.user);
       await fetchUser(nextTokens.accessToken);
     },
     [fetchUser]
@@ -145,6 +175,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setTokens(null);
     setUser(null);
     persistTokens(null);
+    persistUser(null);
   }, [tokens]);
 
   const refresh = useCallback(async () => {

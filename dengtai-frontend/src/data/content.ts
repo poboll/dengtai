@@ -1,6 +1,7 @@
 import type { ContentItem, SearchSuggestion } from "@/types/content";
 
 export const categories = [
+  "推荐",
   "编程",
   "设计",
   "商业",
@@ -11,10 +12,6 @@ export const categories = [
   "其他"
 ];
 
-export const tabFilters = [
-  { id: "latest", label: "最新" },
-  { id: "popular", label: "最热" }
-];
 
 export const suggestions: SearchSuggestion[] = [
   { id: "python", label: "Python编程" },
