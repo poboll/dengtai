@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import SectionHeader from "@/components/common/SectionHeader";
+import TagInput from "@/components/common/TagInput";
 import AuthStatus from "@/features/auth/AuthStatus";
 import { useAuth } from "@/context/AuthContext";
 import { profileService } from "@/services/profileService";
@@ -13,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 // 性别文本输入，仅允许“男/女”
 
 const EditProfilePage = () => {
-  const { user, tokens } = useAuth();
+  const { user, tokens, /* refresh, logout, */ reloadUser } = useAuth();
   const navigate = useNavigate();
   const displayName = useMemo(
     () => user?.nickname ?? user?.phone ?? user?.email ?? "灯塔用户",
@@ -28,6 +29,7 @@ const EditProfilePage = () => {
   const [birthday, setBirthday] = useState<string>(user?.birthday ?? "");
   const [school, setSchool] = useState<string>(user?.school ?? "");
   const [phone, setPhone] = useState<string>(user?.phone ?? "");
+  const [skills, setSkills] = useState<string[]>(user?.skills ?? []);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
@@ -43,6 +45,10 @@ const EditProfilePage = () => {
       const result = await profileService.uploadAvatar(file);
       setAvatarUrl(result.avatar || null);
       setSaveMessage("头像已更新");
+      // 同步更新全局用户信息，刷新右上角头像
+      try {
+        await reloadUser?.();
+      } catch {}
     } catch (error) {
       console.error(error);
       setSaveMessage("头像上传失败，请稍后重试");
@@ -69,10 +75,15 @@ const EditProfilePage = () => {
     if (birthday.trim()) payload.birthday = birthday.trim();
     if (school.trim()) payload.school = school.trim();
     if (phone.trim()) payload.phone = phone.trim();
+    if (skills.length > 0) payload.tagJson = JSON.stringify(skills);
 
     try {
       await profileService.update(payload);
       setSaveMessage("资料已保存");
+      // 保存成功后，同步更新全局用户信息，返回“我的”页面可立即看到最新数据
+      try {
+        await reloadUser?.();
+      } catch {}
     } catch (error) {
       console.error(error);
       setSaveMessage("保存失败，请稍后重试");
@@ -83,12 +94,14 @@ const EditProfilePage = () => {
 
   const avatarInitial = (displayName.trim().charAt(0) || "知").toUpperCase();
 
-  // 进入页面时请求 auth/me，预填表单
+  // 进入页面时请求 auth/me，预填表单；带取消标记避免登出后回写旧数据
   useEffect(() => {
+    let cancelled = false;
     const run = async () => {
       try {
         if (!tokens?.accessToken) return;
         const current = await authService.fetchCurrentUser(tokens.accessToken);
+        if (cancelled) return;
         setNickname(current.nickname ?? "");
         setBio(current.bio ?? "");
         setZgId(current.zhId ?? "");
@@ -100,13 +113,41 @@ const EditProfilePage = () => {
         else if (current.gender === "FEMALE") setGenderText("女");
         else setGenderText("");
         setGenderError("");
+        if (Array.isArray(current.skills)) setSkills(current.skills);
+        else if (typeof current.tagJson === "string") {
+          try {
+            const parsed = JSON.parse(current.tagJson);
+            if (Array.isArray(parsed)) {
+              setSkills(parsed.filter((x) => typeof x === "string"));
+            }
+          } catch (e) {
+            console.warn("解析 tagJson 失败", e);
+          }
+        }
       } catch (error) {
         console.error("获取当前用户失败", error);
       }
     };
     void run();
+    return () => { cancelled = true; };
     // 仅在进入页面时或令牌变化时触发
   }, [tokens?.accessToken]);
+
+  // 退出登录时立刻清空本地个人信息状态，避免残留显示
+  useEffect(() => {
+    if (!tokens?.accessToken || !user) {
+      setNickname("");
+      setBio("");
+      setZgId("");
+      setGenderText("");
+      setGenderError("");
+      setBirthday("");
+      setSchool("");
+      setPhone("");
+      setSkills([]);
+      setAvatarUrl(null);
+    }
+  }, [tokens?.accessToken, user]);
 
   return (
     <AppLayout
@@ -182,6 +223,10 @@ const EditProfilePage = () => {
             <div className={styles.field}>
               <label className={styles.label} htmlFor="school">学校/机构</label>
               <input id="school" className={styles.input} value={school} onChange={e => setSchool(e.target.value)} placeholder="填写你的所在学校或机构" />
+            </div>
+            <div className={`${styles.field} ${styles.fullWidth}`}>
+              <label className={styles.label} htmlFor="skills">擅长领域</label>
+              <TagInput id="skills" value={skills} onChange={setSkills} placeholder="输入标签后按回车" />
             </div>
             <div className={`${styles.field} ${styles.fullWidth}`}>
               <label className={styles.label} htmlFor="bio">个人简介</label>

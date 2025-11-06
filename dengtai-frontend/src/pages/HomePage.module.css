@@ -3,7 +3,7 @@
 }
 
 .masonry {
-  column-count: 3;
+  column-count: 4;
   column-gap: 24px;
 }
 
@@ -11,6 +11,7 @@
   break-inside: avoid;
   -webkit-column-break-inside: avoid;
   margin-bottom: 24px;
+  /* 保持卡片宽度由列宽决定，不额外增加内边距 */
 }
 
 .heroCard {
@@ -19,6 +20,12 @@
 }
 
 @media (max-width: 1200px) {
+  .masonry {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 1000px) {
   .masonry {
     column-count: 2;
   }

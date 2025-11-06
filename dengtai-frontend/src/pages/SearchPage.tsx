@@ -4,7 +4,16 @@ import MainHeader from "@/components/layout/MainHeader";
 import SectionHeader from "@/components/common/SectionHeader";
 import SearchBar from "@/components/common/SearchBar";
 import Tag from "@/components/common/Tag";
-import { suggestions } from "@/data/content";
+// 移除对 mock 数据文件的依赖，改为本地常量（后续可改为服务端数据）
+const suggestions = [
+  { id: "python", label: "Python编程" },
+  { id: "ui", label: "UI设计" },
+  { id: "english", label: "英语学习" },
+  { id: "fitness", label: "健身教程" },
+  { id: "business", label: "商业思维" },
+  { id: "video", label: "视频剪辑" },
+  { id: "analysis", label: "数据分析" }
+];
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./SearchPage.module.css";
 

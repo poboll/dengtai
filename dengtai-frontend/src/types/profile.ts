@@ -9,6 +9,7 @@ export type ProfileUpdateRequest = {
   school?: string;
   email?: string;
   phone?: string;
+  tagJson?: string; // 字符串化的标签数组，例如 "[\"Java\",\"后端\"]"
 };
 
 export type ProfileResponse = {
@@ -22,4 +23,5 @@ export type ProfileResponse = {
   school?: string;
   email?: string;
   phone?: string;
+  tagJson?: string;
 };

@@ -31,6 +31,7 @@ type AuthContextValue = {
   register: (payload: RegisterRequest) => Promise<AuthenticatedUser>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  reloadUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -161,8 +162,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const register = useCallback(async (payload: RegisterRequest) => {
     const result = await authService.register(payload);
-    return result.user as AuthenticatedUser;
-  }, []);
+    // 注册成功后直接登录：写入令牌与用户信息
+    const nextTokens = toTokens(result.token);
+    setTokens(nextTokens);
+    persistTokens(nextTokens);
+    const userInfo = result.user as AuthenticatedUser;
+    setUser(userInfo);
+    persistUser(userInfo);
+    // 为保证信息最新，拉取一次 /auth/me
+    await fetchUser(nextTokens.accessToken);
+    return userInfo;
+  }, [fetchUser]);
 
   const logout = useCallback(async () => {
     if (tokens) {
@@ -195,6 +205,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [tokens, fetchUser, logout]);
 
+  const reloadUser = useCallback(async () => {
+    if (!tokens) return;
+    await fetchUser(tokens.accessToken);
+  }, [tokens, fetchUser]);
+
   useEffect(() => {
     if (!tokens) {
       return;
@@ -213,9 +228,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       login,
       register,
       logout,
-      refresh
+      refresh,
+      reloadUser
     }),
-    [user, tokens, isLoading, login, register, logout, refresh]
+    [user, tokens, isLoading, login, register, logout, refresh, reloadUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

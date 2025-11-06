@@ -40,6 +40,8 @@ export type AuthUserResponse = {
   gender?: Gender; // "MALE" | "FEMALE" | "OTHER" | "UNKNOWN"
   // 兼容可能的扩展
   skills?: string[];
+  // 后端可能返回的 JSON 字符串形式的标签
+  tagJson?: string;
 };
 
 export type TokenResponse = {

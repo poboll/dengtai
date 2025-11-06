@@ -10,10 +10,12 @@ export type CourseCardProps = {
   title: string;
   summary: string;
   tags: string[];
+  authorTags?: string[];
   isFree?: boolean;
   teacher: {
     name: string;
-    avatarText: string;
+    avatarText?: string;
+    avatarUrl?: string;
   };
   stats?: {
     likes: number;
@@ -31,6 +33,7 @@ const CourseCard = ({
   title,
   summary,
   tags,
+  authorTags,
   isFree = true,
   teacher,
   stats,
@@ -60,20 +63,34 @@ const CourseCard = ({
 
       <div className={styles.content}>
         <h3 className={styles.title}>{title}</h3>
-        <p className={styles.description}>{summary}</p>
-        <div className={styles.tagGroups}>
-          {tags.map(tag => (
-            <Tag key={tag}>#{tag}</Tag>
-          ))}
-        </div>
+        {summary.trim() ? (
+          <p className={styles.description}>{summary}</p>
+        ) : null}
+        {tags?.length ? (
+          <div className={styles.tagGroups}>
+            {tags.map(tag => (
+              <Tag key={tag}>#{tag}</Tag>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className={styles.meta}>
         <div className={styles.teacher}>
-          <div className={styles.teacherAvatar}>{teacher.avatarText}</div>
+          {teacher.avatarUrl ? (
+            <img className={styles.teacherAvatarImg} src={teacher.avatarUrl} alt={teacher.name} />
+          ) : (
+            <div className={styles.teacherAvatar}>{teacher.avatarText ?? (teacher.name?.charAt(0) || "?")}</div>
+          )}
           <div className={styles.teacherInfo}>
             <span className={styles.teacherName}>{teacher.name}</span>
-            <span>授课导师</span>
+            {authorTags?.length ? (
+              <div className={styles.authorTags}>
+                {authorTags.map(tag => (
+                  <span key={tag} className={styles.authorTag}>#{tag}</span>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
         {footerExtra ?? (

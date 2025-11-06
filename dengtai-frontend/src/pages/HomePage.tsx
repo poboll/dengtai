@@ -1,58 +1,84 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import CourseCard from "@/components/cards/CourseCard";
-import { categories, mockContents } from "@/data/content";
+import { knowpostService } from "@/services/knowpostService";
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./HomePage.module.css";
 
 const HomePage = () => {
-  // 默认展示全部：不选中任何具体分类
-  const [activeCategory, setActiveCategory] = useState<string>("");
-  // 去除“最新/最热”筛选
+  const [items, setItems] = useState<Array<{
+    id: string;
+    title: string;
+    description: string;
+    coverImage?: string;
+    tags: string[];
+    tagJson?: string;
+    authorAvatar?: string;
+    authorAvator?: string;
+    authorNickname: string;
+  }>>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredContents = useMemo(() => {
-    // “推荐”视为展示全部内容；其他分类按匹配过滤，不做排序
-    const base = !activeCategory ? mockContents : mockContents.filter(item => item.category === activeCategory);
-    return base;
-  }, [activeCategory]);
-
-  // 仅保留瀑布流 Feed 展示全部内容
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const resp = await knowpostService.feed(1, 20);
+        if (!cancelled) {
+          setItems(resp.items ?? []);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "加载失败";
+        if (!cancelled) setError(msg);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <AppLayout
       header={
         <MainHeader
           headline="灯塔 · 让思想有温度，让知识会发光"
-          tabs={categories.map(cat => ({
-            id: cat,
-            label: cat,
-            // “推荐”激活态取决于 activeCategory 为空，其余按分类匹配
-            active: cat === "推荐" ? activeCategory === "" : activeCategory === cat,
-            onSelect: (id: string) => setActiveCategory(id === "推荐" ? "" : id)
-          }))}
           rightSlot={<AuthStatus />}
         />
       }
     >
+      {error ? <div>{error}</div> : null}
       <div className={styles.masonry}>
-        {filteredContents.map(item => (
+        {items.map(item => (
           <div key={item.id} className={styles.masonryItem}>
             <CourseCard
               id={item.id}
               title={item.title}
-              summary={item.summary}
-              tags={item.tags}
-              isFree={item.isFree}
-              teacher={{ name: item.mentor.name, avatarText: item.mentor.name.charAt(0) }}
-              stats={{ likes: item.likes, views: item.views }}
+              summary={item.description ?? ""}
+              tags={item.tags ?? []}
+              authorTags={(() => {
+                try {
+                  return item.tagJson ? (JSON.parse(item.tagJson) as unknown[]).filter((t) => typeof t === "string") as string[] : [];
+                } catch {
+                  return [];
+                }
+              })()}
+              teacher={{ name: item.authorNickname, avatarUrl: item.authorAvatar ?? item.authorAvator }}
               coverImage={item.coverImage}
-              layout={item.coverImage ? "horizontal" : "vertical"}
-              showPlayBadge={item.kind === "video"}
-              to={`/course/${item.id}`}
+                to={`/post/${item.id}`}
             />
           </div>
         ))}
+        {loading ? <div className={styles.masonryItem}><div>加载中…</div></div> : null}
+        {!loading && items.length === 0 ? (
+          <div className={styles.masonryItem}><div>暂无内容</div></div>
+        ) : null}
       </div>
     </AppLayout>
   );

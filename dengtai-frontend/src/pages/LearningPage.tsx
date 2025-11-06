@@ -1,6 +1,11 @@
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
-import { learningEmptyState } from "@/data/content";
+// 移除对 mock 数据文件的依赖，改为本地常量
+const learningEmptyState = {
+  title: "还没有购买内容",
+  description: "去首页探索优质内容吧",
+  actionLabel: "前往首页"
+};
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./LearningPage.module.css";
 

@@ -4,13 +4,13 @@ import { authService } from "@/services/authService";
 import { useAuth } from "@/context/AuthContext";
 import type { IdentifierType, RegisterRequest } from "@/types/auth";
 import styles from "./RegisterPage.module.css";
-import Select from "@/components/common/Select";
+// 注册方式固定为手机号
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { register } = useAuth();
-  const [identifierType, setIdentifierType] = useState<IdentifierType>("PHONE");
+  const identifierType: IdentifierType = "PHONE";
   const [identifier, setIdentifier] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -76,11 +76,12 @@ const RegisterPage = () => {
         agreeTerms
       };
       await register(payload);
-      setMessage("注册成功，请使用账号登录");
+      setMessage("注册成功，已自动登录");
+      // 直接跳回来源页面或首页
+      const from = (location.state as { from?: string } | undefined)?.from ?? "/";
       redirectTimerRef.current = window.setTimeout(() => {
-        const from = (location.state as { from?: string } | undefined)?.from ?? "/";
-        navigate("/login", { replace: true, state: { from } });
-      }, 600);
+        navigate(from, { replace: true });
+      }, 400);
     } catch (err) {
       const info = err instanceof Error ? err.message : "注册失败，请稍后重试";
       setError(info);
@@ -100,30 +101,17 @@ const RegisterPage = () => {
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <Select
-            id="identifierType"
-            label="注册方式"
-            value={identifierType}
-            onChange={val => setIdentifierType(val as IdentifierType)}
-            options={[
-              { label: "手机号", value: "PHONE" },
-              { label: "邮箱", value: "EMAIL" },
-              { label: "用户名", value: "USERNAME" }
-            ]}
-          />
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="identifier">
-              {identifierType === "PHONE" ? "手机号" : identifierType === "EMAIL" ? "邮箱" : "用户名"}
-            </label>
+            <label className={styles.label} htmlFor="identifier">手机号</label>
             <input
               id="identifier"
               className={styles.input}
               value={identifier}
               onChange={event => setIdentifier(event.target.value)}
               placeholder="请输入账号"
-              type={identifierType === "PHONE" ? "tel" : identifierType === "EMAIL" ? "email" : "text"}
-              autoComplete={identifierType === "PHONE" ? "tel" : identifierType === "EMAIL" ? "email" : "username"}
+              type="tel"
+              autoComplete="tel"
             />
           </div>
 
