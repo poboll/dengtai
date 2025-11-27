@@ -42,8 +42,8 @@ const RelationCounters = ({ userId }: RelationCountersProps) => {
             <span className={styles.label}>粉丝</span>
           </div>
           <div className={styles.item}><span className={styles.number}>{counts.posts}</span><span className={styles.label}>发帖</span></div>
-          <div className={styles.item}><span className={styles.number}>{counts.likedPosts}</span><span className={styles.label}>赞过</span></div>
-          <div className={styles.item}><span className={styles.number}>{counts.favedPosts}</span><span className={styles.label}>收藏</span></div>
+          <div className={styles.item}><span className={styles.number}>{counts.likedPosts}</span><span className={styles.label}>获赞</span></div>
+          <div className={styles.item}><span className={styles.number}>{counts.favedPosts}</span><span className={styles.label}>获藏</span></div>
         </div>
       ) : null}
       <RelationListModal open={open} onClose={() => setOpen(false)} userId={userId!} mode={mode} />

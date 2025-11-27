@@ -46,7 +46,9 @@ export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions
     ...headers
   };
 
-  const token = accessToken ?? getStoredAccessToken();
+  // 注意：当 accessToken 显式传入 null 时，表示不要附带 Authorization 头；
+  // 只有当 accessToken 为 undefined（未指定）时，才从本地存储回退读取。
+  const token = accessToken === undefined ? getStoredAccessToken() : accessToken;
   if (token) {
     mergedHeaders.Authorization = `Bearer ${token}`;
   }
