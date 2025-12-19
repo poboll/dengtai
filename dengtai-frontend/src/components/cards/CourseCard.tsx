@@ -9,6 +9,26 @@ import { knowpostService } from "@/services/knowpostService";
 import type { KnowpostDetailResponse, VisibleScope } from "@/types/knowpost";
 import styles from "./CourseCard.module.css";
 
+const renderEmHighlightedText = (text: string): ReactNode => {
+  if (!text.includes("<em")) return text;
+
+  const parts: ReactNode[] = [];
+  const re = /<em(?:\s[^>]*)?>(.*?)<\/em>/gis;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = re.exec(text)) !== null) {
+    const start = match.index;
+    if (start > lastIndex) parts.push(text.slice(lastIndex, start));
+    parts.push(<em key={`em-${key++}`}>{match[1]}</em>);
+    lastIndex = start + match[0].length;
+  }
+
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.length ? <>{parts}</> : text;
+};
+
 export type CourseCardProps = {
   id: string;
   title: string;
@@ -177,7 +197,7 @@ const CourseCard = ({
       <div className={styles.content}>
         <h3 className={styles.title}>{title}</h3>
         {summary.trim() ? (
-          <p className={styles.description}>{summary}</p>
+          <p className={styles.description}>{renderEmHighlightedText(summary)}</p>
         ) : null}
         {tags?.length ? (
           <div className={styles.tagGroups}>

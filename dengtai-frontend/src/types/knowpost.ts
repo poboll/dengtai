@@ -42,7 +42,9 @@ export type FeedItem = {
   description: string;
   coverImage?: string;
   tags: string[];
+  tagJson?: string;
   authorAvatar?: string; // 后端字段名为 authorAvatar
+  authorAvator?: string; // 兼容历史拼写
   authorNickname: string;
   likeCount?: number;
   favoriteCount?: number;

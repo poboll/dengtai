@@ -69,6 +69,13 @@
   color: var(--color-text-muted);
   line-height: 1.6;
 }
+.description em {
+  font-style: normal;
+  background: rgba(255, 214, 153, 0.6);
+  border-radius: 4px;
+  padding: 0 2px;
+  color: var(--color-text-strong);
+}
 
 .tagGroups {
   display: flex;
