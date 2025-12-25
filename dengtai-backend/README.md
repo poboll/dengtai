@@ -4,10 +4,10 @@
 
 
 # 文档示例
-<div style="display: flex; gap: 15px;">
-  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/11a8438f.png" width="330" />
-  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/4035ca79.png" width="330" />
-  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/40b80f25.png" width="330" />
+<div style="display: flex; gap: 10px;">
+  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/11a8438f.png" width="250" />
+  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/4035ca79.png" width="250" />
+  <img src="http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/40b80f25.png" width="250" />
 </div>
 
 ![文档1](http://dengtaiapp.oss-cn-beijing.aliyuncs.com/posts/262804640385601536/images/20251226/43eb8fe1.png)
