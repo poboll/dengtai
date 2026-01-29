@@ -47,9 +47,6 @@ public class RelationServiceImpl implements RelationService {
     private final Cache<Long, List<Long>> flwsTopCache;
     private final Cache<Long, List<Long>> fansTopCache;
     private final UserMapper userMapper;
-
-    private static final int IDX_FOLLOWER = 2; // (2 - 1) * 4, 下标从 4 开始
-    private static final int IDX_FOLLOWING = 1; // 下标从 0 开始
     
 
     /**
@@ -87,7 +84,7 @@ public class RelationServiceImpl implements RelationService {
     public boolean follow(long fromUserId, long toUserId) {
         // Lua 脚本令牌桶限流
         Long ok = redis.execute(tokenScript, List.of("rl:follow:" + fromUserId), "100", "1");
-        if (ok == null || ok == 0L) {
+        if (ok == 0L) {
             return false;
         }
 
@@ -276,12 +273,12 @@ public class RelationServiceImpl implements RelationService {
      * @param userId 用户ID
      * @return 是否为大V
      */
-    private boolean isBigV(long userId, int idx) {
+    private boolean isBigV(long userId) {
         byte[] raw = redis.execute((RedisCallback<byte[]>) c -> c.stringCommands().get(("ucnt:" + userId).getBytes(StandardCharsets.UTF_8)));
         if (raw == null || raw.length < 20) return false;
         long n = 0;
-        int off = (idx - 1) * 4;
-        for (int i = 0; i < 4; i++) n = (n << 8) | (raw[off + i] & 0xFFL); // &0xFFL 确保每一部分都被当作无符号数处理
+        int off = 2 * 4;
+        for (int i = 0; i < 4; i++) n = (n << 8) | (raw[off + i] & 0xFFL);
         return n >= 500_000L;
     }
 
@@ -316,12 +313,7 @@ public class RelationServiceImpl implements RelationService {
             fillZSet(key, rows, idField, tsField, null);
             redis.expire(key, Duration.ofHours(2));
 
-            int idx = switch (idField){
-                case "fromUserId" -> IDX_FOLLOWER;
-                case "toUserId" -> IDX_FOLLOWING;
-                default -> 2; // 给个默认值
-            };
-            if (localCache != null && isBigV(userId, idx)) {
+            if (localCache != null && isBigV(userId)) {
                 maybeUpdateTopCache(userId, key, localCache);
             }
 
