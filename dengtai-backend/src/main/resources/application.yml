@@ -12,7 +12,7 @@ spring:
       minimum-idle: 5                   # 最小空闲连接
       idle-timeout: 600000              # 10 分钟：空闲多久回收
       max-lifetime: 1700000             # 约 28 分钟
-      keepalive-time: 300000            # 5 分钟发一次“保活”
+      keepalive-time: 300000            # 5 分钟发一次"保活"
       connection-timeout: 30000             # 30 秒拿不到连接就报错
   jackson:
     serialization:
@@ -21,6 +21,15 @@ spring:
     redis:
       host: localhost
       port: 6379
+      timeout: 2000ms                   # 命令执行超时
+      connect-timeout: 1000ms           # 连接建立超时
+      lettuce:
+        pool:
+          max-active: 16                # 最大活跃连接数（与 Hikari 对齐）
+          max-idle: 8                   # 最大空闲连接数
+          min-idle: 2                   # 最小空闲连接数（预热，降低首次延迟）
+          max-wait: 1000ms              # 获取连接最长等待时间
+        shutdown-timeout: 200ms         # 优雅停机等待时间
   kafka:
     bootstrap-servers: localhost:9092
     template:
@@ -28,12 +37,10 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
+      acks: all                         # 等待所有 ISR 副本确认（Kafka 4.0 已为默认值，显式保留以明确语义）
       retries: 3
-      linger: 10ms
-      properties:
-        enable.idempotence: true
-        max.in.flight.requests.per.connection: 1
+      linger-ms: 10                     # 批次等待时长（毫秒整型，适配 Kafka 4.0 客户端）
+      # Kafka 4.0 起，enable.idempotence=true 与 max.in.flight.requests.per.connection=5 已为默认值，无需显式声明
     consumer:
       group-id: counter-agg
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

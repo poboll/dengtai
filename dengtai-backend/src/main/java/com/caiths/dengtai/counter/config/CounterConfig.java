@@ -20,7 +20,7 @@ public class CounterConfig {
 
     @Bean
     public ProducerFactory<String, String> stringProducerFactory(KafkaProperties properties) {
-        var props = properties.buildProducerProperties();
+        var props = properties.buildProducerProperties(null); // SslBundles=null: 不使用 TLS bundle
         return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new StringSerializer()); // 统一字符串序列化
     }
 
