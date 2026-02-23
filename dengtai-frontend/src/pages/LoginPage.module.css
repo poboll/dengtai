@@ -147,3 +147,13 @@
     padding: 36px 24px;
   }
 }
+
+.devTip {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.28);
+  color: #7a5800;
+  font-size: 12px;
+  line-height: 1.5;
+}

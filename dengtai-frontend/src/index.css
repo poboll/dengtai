@@ -24,7 +24,7 @@
   /* sidebar 固定宽度 */
   --sidebar-width: 80px;
   /* 主内容区左侧偏移，为固定 sidebar 留空间 */
-  --sidebar-offset: 104px;
+  --sidebar-offset: 112px;
   background: var(--color-bg);
   color: var(--color-text);
 }

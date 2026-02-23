@@ -16,6 +16,7 @@ const LoginPage = () => {
   const [identifier, setIdentifier] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [devTip, setDevTip] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -57,6 +58,7 @@ const LoginPage = () => {
       return;
     }
     setError(null);
+    setDevTip(null);
     setSendingCode(true);
     try {
       const response = await authService.sendCode({
@@ -65,6 +67,7 @@ const LoginPage = () => {
         identifier
       });
       setCountdown(Math.max(1, response.expireSeconds ?? 300));
+      setDevTip("开发模式：验证码已打印至后端日志，可运行 grep 'code=' /tmp/dengtai-backend.log 查看");
     } catch (err) {
       const info = err instanceof Error ? err.message : "验证码发送失败";
       setError(info);
@@ -84,8 +87,6 @@ const LoginPage = () => {
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          {/* 只保留手机号 + 验证码登录，不提供选择 */}
-
           <div className={styles.field}>
             <label className={styles.label} htmlFor="identifier">
               手机号
@@ -123,6 +124,7 @@ const LoginPage = () => {
               </button>
             </div>
             <span className={styles.tips}>验证码用于校验登录，不需要输入密码。</span>
+            {devTip && <div className={styles.devTip}>{devTip}</div>}
           </div>
 
           {error ? <div className={styles.error}>{error}</div> : null}

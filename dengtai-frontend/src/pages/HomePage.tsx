@@ -7,6 +7,8 @@ import { knowpostService } from "@/services/knowpostService";
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./HomePage.module.css";
 
+const SKELETON_COUNT = 8;
+
 const HomePage = () => {
   const [items, setItems] = useState<Array<{
     id: string;
@@ -60,28 +62,33 @@ const HomePage = () => {
     >
       {error ? <div>{error}</div> : null}
       <div className={styles.masonry}>
-        {items.map(item => (
-          <div key={item.id} className={styles.masonryItem}>
-            <CourseCard
-              id={item.id}
-              title={item.title}
-              summary={item.description ?? ""}
-              tags={item.tags ?? []}
-              authorTags={(() => {
-                try {
-                  return item.tagJson ? (JSON.parse(item.tagJson) as unknown[]).filter((t) => typeof t === "string") as string[] : [];
-                } catch {
-                  return [];
-                }
-              })()}
-              teacher={{ name: item.authorNickname, avatarUrl: item.authorAvatar ?? item.authorAvator }}
-              coverImage={item.coverImage}
-                to={`/post/${item.id}`}
-              footerExtra={<LikeFavBar entityId={item.id} compact initialCounts={{ like: item.likeCount ?? 0, fav: item.favoriteCount ?? 0 }} initialState={{ liked: item.liked, faved: item.faved }} />}
-            />
-          </div>
-        ))}
-        {loading ? <div className={styles.masonryItem}><div>加载中…</div></div> : null}
+        {loading
+          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+              <div key={i} className={styles.masonryItem}>
+                <div className={styles.skeletonCard} />
+              </div>
+            ))
+          : items.map(item => (
+              <div key={item.id} className={styles.masonryItem}>
+                <CourseCard
+                  id={item.id}
+                  title={item.title}
+                  summary={item.description ?? ""}
+                  tags={item.tags ?? []}
+                  authorTags={(() => {
+                    try {
+                      return item.tagJson ? (JSON.parse(item.tagJson) as unknown[]).filter((t) => typeof t === "string") as string[] : [];
+                    } catch {
+                      return [];
+                    }
+                  })()}
+                  teacher={{ name: item.authorNickname, avatarUrl: item.authorAvatar ?? item.authorAvator }}
+                  coverImage={item.coverImage}
+                  to={`/post/${item.id}`}
+                  footerExtra={<LikeFavBar entityId={item.id} compact initialCounts={{ like: item.likeCount ?? 0, fav: item.favoriteCount ?? 0 }} initialState={{ liked: item.liked, faved: item.faved }} />}
+                />
+              </div>
+            ))}
         {!loading && items.length === 0 ? (
           <div className={styles.masonryItem}><div>暂无内容</div></div>
         ) : null}
