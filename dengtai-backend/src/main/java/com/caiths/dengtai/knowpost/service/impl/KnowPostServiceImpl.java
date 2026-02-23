@@ -258,13 +258,7 @@ public class KnowPostServiceImpl implements KnowPostService {
     }
 
     private String publicUrl(String objectKey) {
-        String publicDomain = ossProperties.getPublicDomain();
-
-        if (publicDomain != null && !publicDomain.isBlank()) {
-            return publicDomain.replaceAll("/$", "") + "/" + objectKey;
-        }
-
-        return "https://" + ossProperties.getBucket() + "." + ossProperties.getEndpoint() + "/" + objectKey;
+        return ossProperties.getDomain().replaceAll("/$", "") + "/" + objectKey;
     }
 
     /**

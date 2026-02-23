@@ -3,13 +3,13 @@ package com.caiths.dengtai.storage;
 import com.caiths.dengtai.common.exception.BusinessException;
 import com.caiths.dengtai.common.exception.ErrorCode;
 import com.caiths.dengtai.storage.config.OssProperties;
-import com.google.gson.Gson;
+
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
-import com.qiniu.storage.model.DefaultPutRet;
+
 import com.qiniu.util.Auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,9 @@ public class OssStorageService {
 
         try {
             Response response = uploadManager.put(file.getInputStream(), objectKey, upToken, null, null);
-            new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+            if (!response.isOK()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "头像上传失败：" + response.error);
+            }
         } catch (QiniuException e) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "头像上传失败：" + e.getMessage());
         } catch (IOException e) {

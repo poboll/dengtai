@@ -71,7 +71,7 @@ spring:
         index-name: dengtai-ai-index
         dimensions: 1536 # 一定要和上面的 dimensions 一致，不然会报错
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://localhost:9012
 
 canal:
   enabled: true
