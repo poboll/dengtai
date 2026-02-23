@@ -1,3 +1,6 @@
+server:
+  port: 8082
+
 
 spring:
   application:
@@ -52,7 +55,7 @@ spring:
       ack-mode: manual
   ai:
     deepseek:
-      api-key: DEEPSEEK_API_KEY_REMOVED
+      api-key: ${DEEPSEEK_API_KEY}
       base-url: https://api.deepseek.com
       chat:
         options:
@@ -60,7 +63,7 @@ spring:
           temperature: 0.8
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: 写你自己的
+      api-key: ${OPENAI_API_KEY:PLACEHOLDER_NOT_CONFIGURED}
       embedding:
         options:
           model: text-embedding-v4 # 向量模型
@@ -126,8 +129,8 @@ logging:
     '[com.caiths.dengtai]': DEBUG
 
 oss:
-  access-key: QINIU_AK_REMOVED
-  secret-key: QINIU_SK_REMOVED
+  access-key: ${QINIU_ACCESS_KEY}
+  secret-key: ${QINIU_SECRET_KEY}
   bucket: xint
   domain: https://qixint.caiths.com
   folder: dengtai
