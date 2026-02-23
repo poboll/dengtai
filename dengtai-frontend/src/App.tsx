@@ -8,6 +8,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import AiAssistantPage from "./pages/AiAssistantPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/search" element={<SearchPage />} />
       <Route path="/create" element={<CreatePage />} />
       <Route path="/learn" element={<LearningPage />} />
+      <Route path="/ai" element={<AiAssistantPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/edit" element={<EditProfilePage />} />
       <Route path="/post/:id" element={<CourseDetailPage />} />

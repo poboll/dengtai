@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { CreateIcon, HomeIcon, ProfileIcon, SearchIcon, SparkIcon, StudyIcon } from "@/components/icons/Icon";
+import { AiIcon, CreateIcon, HomeIcon, ProfileIcon, SearchIcon, SparkIcon, StudyIcon } from "@/components/icons/Icon";
 import styles from "./Sidebar.module.css";
 
 const navItems = [
@@ -7,14 +7,15 @@ const navItems = [
   { to: "/search", label: "搜索", Icon: SearchIcon },
   { to: "/create", label: "创作", Icon: CreateIcon },
   { to: "/learn", label: "学习", Icon: StudyIcon },
-  { to: "/profile", label: "我的", Icon: ProfileIcon }
+  { to: "/ai", label: "AI助手", Icon: AiIcon },
+  { to: "/profile", label: "我的", Icon: ProfileIcon },
 ] as const;
 
 const Sidebar = () => {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
-        <SparkIcon width={30} height={30} stroke="none" fill="#fff" />
+        <SparkIcon width={28} height={28} stroke="none" fill="#fff" />
       </div>
       <nav className={styles.nav}>
         {navItems.map(({ to, label, Icon }) => (
@@ -22,17 +23,19 @@ const Sidebar = () => {
             key={to}
             to={to}
             end={to === "/"}
-            className={({ isActive }) => (isActive ? `${styles.link} ${styles.linkActive}` : styles.link)}
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.linkActive}` : styles.link
+            }
           >
             <Icon />
-            {label}
+            <span className={styles.label}>{label}</span>
           </NavLink>
         ))}
       </nav>
-      <div className={styles.divider} />
+      <div className={styles.spacer} />
       <div className={styles.footer}>
-        <span>灯塔</span>
-        <div>让知识发光</div>
+        <span className={styles.footerBrand}>灯塔</span>
+        <div className={styles.footerSlogan}>让知识发光</div>
       </div>
     </aside>
   );

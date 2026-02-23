@@ -80,3 +80,29 @@ export const BookmarkIcon = createIcon(
     <path d="M7.5 4h9a1 1 0 0 1 1 1v14l-5.5-3.5L6.5 19V5a1 1 0 0 1 1-1z" />
   </>
 );
+
+export const AiIcon = createIcon(
+  <>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+  </>
+);
+
+export const SendIcon = createIcon(
+  <>
+    <path d="M22 2 11 13" />
+    <path d="m22 2-7 20-4-9-9-4 20-7z" />
+  </>
+);
+
+export const PlusIcon = createIcon(
+  <>
+    <path d="M12 5v14M5 12h14" />
+  </>
+);
+
+export const ChevronRightIcon = createIcon(
+  <>
+    <path d="m9 18 6-6-6-6" />
+  </>
+);

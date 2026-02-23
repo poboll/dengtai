@@ -5,16 +5,22 @@ import styles from "./AppLayout.module.css";
 type AppLayoutProps = {
   header?: ReactNode;
   children: ReactNode;
-  variant?: "default" | "cardless";
+  variant?: "default" | "cardless" | "full";
 };
 
 const AppLayout = ({ header, children, variant = "default" }: AppLayoutProps) => {
   return (
     <div className="app-shell">
       <Sidebar />
-      <div className={styles.container}>
+      <div className={`app-content ${styles.container}`}>
         {header}
-        <div className={variant === "default" ? styles.pageCard : styles.main}>{children}</div>
+        <div className={
+          variant === "full" ? styles.full :
+          variant === "cardless" ? styles.main :
+          styles.pageCard
+        }>
+          {children}
+        </div>
       </div>
     </div>
   );
