@@ -8,10 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "oss")
 public class OssProperties {
-    private String endpoint;
-    private String accessKeyId;
-    private String accessKeySecret;
+    private String accessKey;
+    private String secretKey;
     private String bucket;
-    private String publicDomain; // 可选：如自定义 CDN 域名
-    private String folder = "avatars"; // 默认上传目录
+    private String domain;
+    private String folder = "dengtai";
 }

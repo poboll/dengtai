@@ -5,12 +5,12 @@
 **高并发知识社区平台 — 全链路工程实践**
 
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
-[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.x-005571?logo=elasticsearch)](https://www.elastic.co/)
-[![Kafka](https://img.shields.io/badge/Kafka-3.x-231F20?logo=apachekafka)](https://kafka.apache.org/)
-[![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis)](https://redis.io/)
+[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-9.3-005571?logo=elasticsearch)](https://www.elastic.co/)
+[![Kafka](https://img.shields.io/badge/Kafka-4.0-231F20?logo=apachekafka)](https://kafka.apache.org/)
+[![Redis](https://img.shields.io/badge/Redis-8.0-DC382D?logo=redis)](https://redis.io/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 > 一个面向**高并发读写**场景设计的知识社区平台，覆盖认证、内容创作、社交关系、智能检索、RAG 问答等完整业务链路，深度践行大厂级工程规范。
@@ -40,16 +40,16 @@
 └───────┬───────────┬────────────┬────────────┬────────────────────┘
         │           │            │            │
    ┌────▼───┐  ┌────▼──┐  ┌─────▼──┐   ┌────▼──────┐
-   │ MySQL  │  │ Redis │  │ Kafka  │   │    OSS    │
-   └────────┘  └───────┘  └────────┘   └───────────┘
-        │                      │
+   │ MySQL  │  │ Redis │  │ Kafka  │   │  七牛云   │
+   └────────┘  └───────┘  └────────┘   │   Kodo    │
+        │                      │        └───────────┘
    ┌────▼──────────────────────▼──┐
    │      Canal (CDC)              │
    │  outbox → relation / search  │
    └──────────────────────────────┘
         │
    ┌────▼───────────────────────────┐
-   │  Elasticsearch                  │
+   │  Elasticsearch 9               │
    │  向量索引 + 全文索引             │
    └────────────────────────────────┘
 ```
@@ -72,9 +72,9 @@
 - **采样一致性校验**：定期对比 Redis 与 MySQL 计数，自动修复漂移
 - **灾难回放**：Kafka offset 手动提交，宕机后从断点继续，零丢失
 
-### 📝 灯文系统 — OSS 预签名直传 + AI 摘要
+### 📝 灯文系统 — 七牛云直传 + AI 摘要
 
-- **预签名直传**：客户端直接上传至阿里云 OSS，服务端仅生成签名，带宽压力降至零
+- **上传凭证直传**：服务端签发七牛云 Upload Token，前端直传至 Kodo，带宽压力降至零
 - **DeepSeek 摘要**：发布时自动调用 DeepSeek AI 生成内容摘要，写入 ES 向量索引
 
 ### 👥 社交关系系统 — Canal + Outbox 模式
@@ -114,7 +114,7 @@ dengtai/
 │   │   ├── relation/                 # 社交关系模块（Canal Outbox）
 │   │   ├── search/                   # 搜索模块（ES）
 │   │   ├── llm/                      # AI 模块（RAG + DeepSeek）
-│   │   ├── storage/                  # 对象存储模块（OSS）
+│   │   ├── storage/                  # 对象存储模块（七牛云 Kodo）
 │   │   ├── cache/                    # 缓存模块（三级 + hotkey）
 │   │   ├── user/                     # 用户模块
 │   │   ├── profile/                  # 个人资料模块
@@ -137,14 +137,14 @@ dengtai/
 | 层次 | 技术选型 |
 |------|---------|
 | 前端框架 | React 18 + Vite 5 |
-| 后端框架 | Spring Boot 3 / Java 21 |
+| 后端框架 | Spring Boot 3.4 / Java 21 |
 | 持久层 | MySQL 8 + MyBatis |
-| 缓存 | Redis 7（Bitmap、SDS、Caffeine L1）|
-| 消息队列 | Apache Kafka 3 |
-| CDC | Alibaba Canal |
-| 搜索 / 向量 | Elasticsearch 8 |
-| AI | Spring AI + DeepSeek + 阿里云 Embedding |
-| 对象存储 | 阿里云 OSS |
+| 缓存 | Redis 8（Bitmap、SDS、Caffeine L1）|
+| 消息队列 | Apache Kafka 4.0 |
+| CDC | Alibaba Canal 1.1.8 |
+| 搜索 / 向量 | Elasticsearch 9.3 |
+| AI | Spring AI 1.0 + DeepSeek + 阿里云 Embedding |
+| 对象存储 | 七牛云 Kodo（新加坡区域）|
 | 分布式锁 | Redisson |
 | 认证 | JWT RS256（Spring Security OAuth2 Resource Server）|
 
@@ -157,9 +157,9 @@ dengtai/
 ```bash
 # 确保以下服务已运行
 MySQL 8      → localhost:3306
-Redis 7      → localhost:6379
-Kafka 3      → localhost:9092
-Elasticsearch 8 → localhost:9200
+Redis 8      → localhost:6379
+Kafka 4.0    → localhost:9092
+Elasticsearch 9 → localhost:9200
 Canal        → localhost:11111
 ```
 
@@ -168,10 +168,8 @@ Canal        → localhost:11111
 ```bash
 cd dengtai-backend
 
-# 1. 填写 application.yml 中的占位符（OSS/AI Key 等）
-
-# 2. 构建并运行
-./mvnw spring-boot:run
+# 填写 application.yml 中的 AI Key 等配置项，然后运行
+./mvnw spring-boot:run -Dmaven.repo.local=~/.m2/repository
 ```
 
 ### 前端
