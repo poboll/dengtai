@@ -1,185 +1,48 @@
+/* ── Card Shell ── */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 24px;
+  border-radius: 16px;
   background: var(--color-surface);
+  border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
-  min-height: 280px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .card a {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   height: 100%;
   color: inherit;
 }
 
-.card a:hover {
-  text-decoration: none;
-}
-
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 48px rgba(26, 26, 44, 0.12);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
-.topBadge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.topBadge span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--color-primary-strong);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(26, 26, 44, 0.12);
-}
-
-.content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  /* 取消免费徽章后，移除额外的上边距 */
-  margin-top: 0;
-}
-
-.title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-strong);
-}
-
-.description {
-  font-size: 14px;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-.description em {
-  font-style: normal;
-  background: rgba(255, 214, 153, 0.6);
-  border-radius: 4px;
-  padding: 0 2px;
-  color: var(--color-text-strong);
-}
-
-.tagGroups {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.meta {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.teacher {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.teacherAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 138, 65, 0.12);
-  font-weight: 600;
-  color: var(--color-primary-strong);
-}
-
-.teacherAvatarImg {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  object-fit: cover;
-  display: block;
-}
-
-.teacherInfo {
-  display: flex;
-  flex-direction: column;
-  font-size: 13px;
-  color: var(--color-text-muted);
-}
-
-.teacherName {
-  color: var(--color-text-strong);
-  font-weight: 600;
-}
-
-.authorTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.authorTag {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.statItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.footerExtra {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+/* ── Cover Image — full bleed top ── */
+.coverWrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 0;
+  flex-shrink: 0;
 }
 
 .cover {
   width: 100%;
-  border-radius: 18px;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
+  transition: transform 0.3s ease;
 }
 
-.coverWrap {
-  position: relative;
-}
-
-.variantHorizontal {
-  grid-template-columns: 1.1fr 0.9fr;
-  align-items: stretch;
-}
-
-.variantHorizontalText {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.card:hover .cover {
+  transform: scale(1.03);
 }
 
 .playBadge {
@@ -187,48 +50,204 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   display: grid;
   place-items: center;
-  color: var(--color-primary-strong);
-  box-shadow: inset 0 0 0 1px rgba(255, 138, 65, 0.22), 0 10px 24px rgba(26, 26, 44, 0.12);
+  color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* 右上角编辑菜单入口 */
-.menuButton {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+/* ── Content Area ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 0;
+  flex: 1;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description em {
+  font-style: normal;
+  background: rgba(255, 107, 53, 0.12);
+  border-radius: 3px;
+  padding: 0 2px;
+  color: var(--color-text);
+}
+
+.tagGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* ── Meta (Author + Stats) ── */
+.meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px 14px;
+}
+
+.teacher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.teacherAvatar {
   width: 28px;
   height: 28px;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: rgba(26, 26, 44, 0.06);
+  background: rgba(255, 107, 53, 0.1);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.teacherAvatarImg {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.teacherInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.teacherName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.authorTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.authorTag {
+  font-size: 11px;
   color: var(--color-text-muted);
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.statItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footerExtra {
+  padding: 0 16px 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Top Badge ── */
+.topBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+}
+
+.topBadge span {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+}
+
+/* ── Edit Menu ── */
+.menuButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
   cursor: pointer;
   z-index: 5;
   border: none;
-  outline: none;
+  font-size: 14px;
+  line-height: 1;
 }
-.menuButton:hover { background: rgba(26, 26, 44, 0.12); color: var(--color-text-strong); }
-.menuButton:focus { box-shadow: 0 0 0 2px rgba(255, 138, 65, 0.28); }
+
+.menuButton:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
 
 .menuList {
   position: absolute;
-  top: 44px;
-  right: 12px;
-  min-width: 160px;
+  top: 40px;
+  right: 10px;
+  min-width: 150px;
   background: var(--color-surface);
   border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(26, 26, 44, 0.12);
-  border: 1px solid rgba(26, 26, 44, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--color-border);
   padding: 6px;
   z-index: 10;
 }
+
 .menuItem {
   display: flex;
   align-items: center;
@@ -236,17 +255,27 @@
   width: 100%;
   text-align: left;
   font-size: 13px;
-  color: var(--color-text-strong);
-  padding: 8px 10px;
+  color: var(--color-text);
+  padding: 7px 10px;
   border-radius: 8px;
   background: transparent;
   border: none;
+  cursor: pointer;
 }
-.menuItem:hover { background: rgba(255, 138, 65, 0.08); }
-.menuDanger { color: var(--color-danger); }
 
-@media (max-width: 1100px) {
-  .variantHorizontal {
-    grid-template-columns: 1fr;
-  }
+.menuItem:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.menuDanger {
+  color: #e53935;
+}
+
+/* ── No-image fallback layout ── */
+.card:not(:has(.coverWrap)) .content {
+  padding-top: 18px;
+}
+
+.card:not(:has(.coverWrap)) {
+  min-height: 200px;
 }

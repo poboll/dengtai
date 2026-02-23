@@ -3,28 +3,40 @@
   font-family: "PingFang SC", "HarmonyOS Sans SC", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  --color-primary: #ff8a41;
-  --color-primary-strong: #ff7a22;
-  --color-secondary: #ffe1bf;
-  --color-accent: #ffcc73;
+
+  /* ── Brand Colors ── */
+  --color-primary: #ff6b35;
+  --color-primary-strong: #e85a1f;
+  --color-secondary: #ffe4d6;
+  --color-accent: #ffaa70;
   --color-success: #12c07b;
   --color-info: #4b85f1;
-  --color-text-strong: #1a1a2e;
-  --color-text: #3a3a4a;
-  --color-text-muted: #8888a0;
-  --color-border: rgba(255, 163, 88, 0.2);
-  --color-bg: #faf8f5;
+
+  /* ── Text ── */
+  --color-text-strong: #111111;
+  --color-text: #333333;
+  --color-text-muted: #888888;
+
+  /* ── Surfaces ── */
+  --color-bg: #f7f7f5;
   --color-surface: #ffffff;
-  --color-surface-soft: #fff5e8;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --shadow-soft: 0 4px 24px rgba(255, 138, 65, 0.12);
-  --shadow-card: 0 2px 16px rgba(26, 26, 44, 0.06), 0 8px 32px rgba(26, 26, 44, 0.04);
-  /* sidebar 固定宽度 */
-  --sidebar-width: 80px;
-  /* 主内容区左侧偏移，为固定 sidebar 留空间 */
+  --color-surface-soft: #fdf4ee;
+  --color-border: rgba(0, 0, 0, 0.07);
+
+  /* ── Radius ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* ── Shadows ── */
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.06);
+
+  /* ── Layout ── */
+  --sidebar-width: 88px;
   --sidebar-offset: 112px;
+
   background: var(--color-bg);
   color: var(--color-text);
 }
@@ -50,10 +62,6 @@ html {
 body {
   margin: 0;
   background: var(--color-bg);
-  background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(255, 188, 110, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, rgba(255, 138, 65, 0.1) 0%, transparent 40%);
-  background-attachment: fixed;
 }
 
 #root {
@@ -62,9 +70,9 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-strong);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -80,49 +88,45 @@ a {
   text-decoration: none;
 }
 
-/* ===== 全局布局 shell =====
- * Sidebar 固定定位，主内容区通过 margin-left 偏移腾出空间
- */
+/* ── App Shell ── */
 .app-shell {
   display: flex;
   min-height: 100vh;
 }
 
 .app-shell > aside {
-  /* fixed sidebar 不占流式布局空间，此处为占位兼容旧布局 */
   flex-shrink: 0;
 }
 
-/* 主内容区：适应 fixed sidebar 的偏移 */
 .app-content {
   margin-left: var(--sidebar-offset);
   flex: 1;
   min-width: 0;
-  padding: 24px 32px 48px;
-  max-width: 1280px;
+  padding: 20px 28px 48px;
+  max-width: 1360px;
 }
 
-/* ===== 通用工具按钮 ===== */
+/* ── Global Buttons ── */
 .ghost-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 18px;
+  padding: 8px 18px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 138, 65, 0.28);
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--color-primary-strong);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-strong);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .ghost-button:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(255, 138, 65, 0.5);
-  box-shadow: 0 4px 16px rgba(255, 138, 65, 0.2);
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 
@@ -130,28 +134,29 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 20px;
+  padding: 8px 20px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #ffb06a, #ff7a22);
+  background: var(--color-primary);
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.18s ease;
-  box-shadow: 0 4px 16px rgba(255, 122, 34, 0.35);
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
   white-space: nowrap;
 }
 
 .primary-button:hover {
-  box-shadow: 0 6px 24px rgba(255, 122, 34, 0.48);
+  background: var(--color-primary-strong);
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
   transform: translateY(-1px);
 }
 
-/* ===== 响应式 ===== */
+/* ── Responsive ── */
 @media (max-width: 1200px) {
   .app-content {
-    padding: 20px 24px 40px;
+    padding: 18px 22px 40px;
   }
 }
 
@@ -162,6 +167,6 @@ a {
 
   .app-content {
     margin-left: 0;
-    padding: 16px 16px 80px; /* 底部为移���端导航栏留空间 */
+    padding: 14px 14px 80px;
   }
 }

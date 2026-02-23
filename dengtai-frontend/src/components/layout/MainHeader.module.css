@@ -1,111 +1,110 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 24px 28px;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 138, 65, 0.1);
-  box-shadow:
-    0 2px 12px rgba(26, 26, 44, 0.05),
-    0 8px 32px rgba(26, 26, 44, 0.03);
+  gap: 0;
+  background: var(--color-surface);
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
 
 .topRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
+  padding: 16px 24px;
 }
 
 .titles {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
 
 .headline {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--color-text-strong);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-muted);
   line-height: 1.4;
 }
 
+/* ── Tabs (pill style) ── */
 .tabs {
   display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 20px 14px;
   flex-wrap: wrap;
-  gap: 8px;
 }
 
 .tab {
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: rgba(255, 249, 240, 0.9);
-  border: 1px solid rgba(255, 138, 65, 0.15);
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.tab:hover {
-  border-color: rgba(255, 138, 65, 0.35);
-  color: var(--color-primary-strong);
-  background: rgba(255, 249, 240, 1);
-  transform: translateY(-1px);
-}
-
-.tabActive {
-  background: linear-gradient(135deg, #ffb06a 0%, #ff7a22 100%);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 6px 20px rgba(255, 122, 34, 0.28);
-}
-
-.tabActive:hover {
-  color: #fff;
-}
-
-.filters {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filterButton {
   padding: 6px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 138, 65, 0.2);
+  border-radius: 999px;
   background: transparent;
+  border: none;
   color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-strong);
+}
+
+.tabActive {
+  background: var(--color-primary);
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.tabActive:hover {
+  background: var(--color-primary-strong);
+  color: #fff;
+}
+
+/* ── Filters ── */
+.filters {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0 24px 14px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .filterButton:hover {
-  border-color: rgba(255, 138, 65, 0.45);
-  color: var(--color-primary-strong);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: var(--color-text);
 }
 
 .filterButtonActive {
-  border-color: transparent;
-  background: var(--color-primary-strong);
+  border-color: var(--color-primary);
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(255, 138, 65, 0.28);
 }
 
 .filterButtonActive:hover {
@@ -115,23 +114,24 @@
 .extras {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
-  .header {
-    padding: 18px 20px;
-  }
-
   .topRow {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
+    padding: 14px 18px;
+  }
+
+  .tabs {
+    padding: 0 14px 12px;
   }
 
   .headline {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .extras {
