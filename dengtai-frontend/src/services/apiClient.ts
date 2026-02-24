@@ -1,6 +1,5 @@
 const getBaseUrl = () => {
   const envBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
-  // 默认使用相对路径，配合 Vite dev proxy，在生产通过环境变量显式配置。
   return envBase?.replace(/\/$/, "") ?? "";
 };
 
@@ -23,37 +22,63 @@ export class ApiError extends Error {
   }
 }
 
+const getStoredAccessToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem("dengtai_auth_tokens");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { accessToken?: string };
+    return parsed.accessToken ?? null;
+  } catch {
+    return null;
+  }
+};
+
+async function doFetch<TResponse>(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body: unknown,
+  isFormData: boolean,
+  signal?: AbortSignal,
+): Promise<Response> {
+  return fetch(url, {
+    method,
+    headers,
+    body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
+    signal,
+    credentials: "include"
+  });
+}
+
+function buildErrorMessage(rawText: string, status: number): { message: string; data: unknown } {
+  let errorData: unknown = rawText;
+  if (rawText) {
+    try { errorData = JSON.parse(rawText); } catch { /* keep raw */ }
+  }
+  const message = typeof errorData === "object" && errorData !== null && "message" in errorData
+    ? (errorData as { message: string }).message
+    : rawText || `请求失败：${status}`;
+  return { message, data: errorData };
+}
+
 export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions = {}): Promise<TResponse> {
   const baseUrl = getBaseUrl();
   const { method = "GET", headers = {}, body, accessToken, signal } = options;
 
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
 
-  const getStoredAccessToken = (): string | null => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("dengtai_auth_tokens");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { accessToken?: string };
-      return parsed.accessToken ?? null;
-    } catch {
-      return null;
-    }
-  };
-
   const mergedHeaders: Record<string, string> = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...headers
   };
 
-  // 注意：当 accessToken 显式传入 null 时，表示不要附带 Authorization 头；
-  // 只有当 accessToken 为 undefined（未指定）时，才从本地存储回退读取。
-  const token = accessToken === undefined ? getStoredAccessToken() : accessToken;
+  const tokenWasAutoAttached = accessToken === undefined;
+  const token = tokenWasAutoAttached ? getStoredAccessToken() : accessToken;
   if (token) {
     mergedHeaders.Authorization = `Bearer ${token}`;
   }
 
-  // 若服务端启用了 CSRF 防护（如 Spring Security），尝试从 Cookie 中读取 XSRF-TOKEN 并随非幂等请求附加到头部
   const methodUpper = method.toUpperCase();
   const isIdempotent = methodUpper === "GET" || methodUpper === "HEAD" || methodUpper === "OPTIONS";
   if (!isIdempotent && typeof document !== "undefined") {
@@ -64,41 +89,22 @@ export async function apiFetch<TResponse>(path: string, options: ApiFetchOptions
       if (xsrfToken && !("X-XSRF-TOKEN" in mergedHeaders)) {
         mergedHeaders["X-XSRF-TOKEN"] = xsrfToken;
       }
-    } catch {
-      // 忽略读取失败，保持无 header
-    }
+    } catch { /* ignore */ }
   }
 
   const url = baseUrl ? `${baseUrl}${path}` : path;
-  const response = await fetch(url, {
-    method,
-    headers: mergedHeaders,
-    body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
-    signal,
-    // 确保在代理或跨域场景下也能携带 Cookie（包括可能的 XSRF-TOKEN）
-    credentials: "include"
-  });
+  let response = await doFetch(url, method, mergedHeaders, body, isFormData, signal);
+
+  if (response.status === 401 && tokenWasAutoAttached && token) {
+    delete mergedHeaders.Authorization;
+    response = await doFetch(url, method, mergedHeaders, body, isFormData, signal);
+  }
 
   if (!response.ok) {
-    // 统一按文本读取一次，避免重复读取导致“body stream already read”
     let rawText = "";
-    try {
-      rawText = await response.text();
-    } catch {
-      rawText = "";
-    }
-    let errorData: unknown = rawText;
-    if (rawText) {
-      try {
-        errorData = JSON.parse(rawText);
-      } catch {
-        // 保留原始文本
-      }
-    }
-    const message = typeof errorData === "object" && errorData !== null && "message" in errorData
-      ? (errorData as { message: string }).message
-      : rawText || `请求失败：${response.status}`;
-    throw new ApiError(response.status, message, errorData);
+    try { rawText = await response.text(); } catch { rawText = ""; }
+    const { message, data } = buildErrorMessage(rawText, response.status);
+    throw new ApiError(response.status, message, data);
   }
 
   if (response.status === 204) {

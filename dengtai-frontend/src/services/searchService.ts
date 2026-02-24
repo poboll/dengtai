@@ -11,13 +11,13 @@ export const searchService = {
     if (size) usp.set("size", String(size));
     if (tags) usp.set("tags", tags);
     if (after) usp.set("after", after);
-    return apiFetch<SearchResponse>(`${SEARCH_PREFIX}?${usp.toString()}`);
+    return apiFetch<SearchResponse>(`${SEARCH_PREFIX}?${usp.toString()}`, { accessToken: null });
   },
 
   suggest: (prefix: string, size = 10) => {
     const usp = new URLSearchParams();
     usp.set("prefix", prefix);
     if (size) usp.set("size", String(size));
-    return apiFetch<SuggestResponse>(`${SEARCH_PREFIX}/suggest?${usp.toString()}`);
+    return apiFetch<SuggestResponse>(`${SEARCH_PREFIX}/suggest?${usp.toString()}`, { accessToken: null });
   }
 };

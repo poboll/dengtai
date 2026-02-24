@@ -61,7 +61,7 @@ export const knowpostService = {
 
   // 获取首页 Feed 列表（公开内容）
   feed: (page = 1, size = 20) =>
-    apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/feed?page=${page}&size=${size}`)
+    apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/feed?page=${page}&size=${size}`, { accessToken: null })
   ,
 
   // 获取我的知文（需鉴权）

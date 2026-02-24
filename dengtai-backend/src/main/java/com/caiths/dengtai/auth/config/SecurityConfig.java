@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         // 公开内容：首页 Feed 不需要登录
                         .requestMatchers("/api/v1/knowposts/feed").permitAll()
+                        // 搜索接口（公开内容）
+                        .requestMatchers("/api/v1/search", "/api/v1/search/suggest").permitAll()
                         // 知文详情（公开已发布内容，非公开由服务层校验）
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/knowposts/detail/*").permitAll()
                         // 知文详情页 RAG 问答（SSE 流式输出）允许匿名访问
