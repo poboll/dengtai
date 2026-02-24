@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import SectionHeader from "@/components/common/SectionHeader";
@@ -25,6 +26,17 @@ const SearchPage = () => {
   const debounceRef = useRef<number | null>(null);
   const { user } = useAuth();
   const [showLoginHint, setShowLoginHint] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // URL 参数自动搜索
+  useEffect(() => {
+    const initialQ = searchParams.get("q");
+    if (initialQ) {
+      setQ(initialQ);
+      executeSearch(initialQ);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const executeSearch = async (keyword: string) => {
     const text = keyword.trim();

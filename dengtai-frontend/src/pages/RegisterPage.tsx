@@ -1,10 +1,10 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "@/services/authService";
 import { useAuth } from "@/context/AuthContext";
 import type { IdentifierType, RegisterRequest } from "@/types/auth";
+import DevToast from "@/components/common/DevToast";
 import styles from "./RegisterPage.module.css";
-// 注册方式固定为手机号
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -20,7 +20,9 @@ const RegisterPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [toastVisible, setToastVisible] = useState(false);
   const redirectTimerRef = useRef<number | null>(null);
+
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -36,6 +38,8 @@ const RegisterPage = () => {
     };
   }, []);
 
+  const handleDismissToast = useCallback(() => setToastVisible(false), []);
+
   const handleSendCode = async () => {
     if (!identifier) {
       setError("请先填写账号信息");
@@ -45,13 +49,18 @@ const RegisterPage = () => {
     setMessage(null);
     setSendingCode(true);
     try {
-      await authService.sendCode({
+      const response = await authService.sendCode({
         scene: "REGISTER",
         identifier,
         identifierType
       });
-      setMessage("验证码已发送，请注意查收");
       setCountdown(60);
+      if (response.devCode) {
+        setCode(response.devCode);
+        setToastVisible(true);
+      } else {
+        setMessage("验证码已发送，请注意查收");
+      }
     } catch (err) {
       const info = err instanceof Error ? err.message : "验证码发送失败";
       setError(info);
@@ -75,7 +84,6 @@ const RegisterPage = () => {
       };
       await register(payload);
       setMessage("注册成功，已自动登录");
-      // 直接跳回来源页面或首页
       const from = (location.state as { from?: string } | undefined)?.from ?? "/";
       redirectTimerRef.current = window.setTimeout(() => {
         navigate(from, { replace: true });
@@ -99,7 +107,6 @@ const RegisterPage = () => {
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-
           <div className={styles.field}>
             <label className={styles.label} htmlFor="identifier">手机号</label>
             <input
@@ -114,9 +121,7 @@ const RegisterPage = () => {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="code">
-              验证码
-            </label>
+            <label className={styles.label} htmlFor="code">验证码</label>
             <div className={styles.codeRow}>
               <input
                 id="code"
@@ -139,9 +144,7 @@ const RegisterPage = () => {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="password">
-              登录密码
-            </label>
+            <label className={styles.label} htmlFor="password">登录密码</label>
             <input
               id="password"
               className={styles.input}
@@ -152,8 +155,6 @@ const RegisterPage = () => {
               autoComplete="new-password"
             />
           </div>
-
-          
 
           <div className={styles.field}>
             <div className={styles.checkboxRow}>
@@ -186,6 +187,12 @@ const RegisterPage = () => {
           </div>
         </form>
       </div>
+
+      <DevToast
+        message="开发模式：验证码已自动填入哦~"
+        visible={toastVisible}
+        onDismiss={handleDismissToast}
+      />
     </div>
   );
 };

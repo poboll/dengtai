@@ -1,12 +1,11 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import UserBadge from "@/components/common/UserBadge";
 import { useAuth } from "@/context/AuthContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 import styles from "./AuthStatus.module.css";
 
 const AuthStatus = () => {
   const { user, logout, isLoading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { openAuthModal } = useAuthModal();
 
   if (isLoading) {
     return <div style={{ color: "var(--color-text-muted)", fontSize: 13 }}>加载中...</div>;
@@ -17,12 +16,7 @@ const AuthStatus = () => {
       <button
         type="button"
         className="ghost-button"
-        onClick={() =>
-          navigate("/login", {
-            replace: false,
-            state: { from: location.pathname + location.search + location.hash }
-          })
-        }
+        onClick={() => openAuthModal("login")}
       >
         登录
       </button>

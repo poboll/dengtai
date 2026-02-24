@@ -56,6 +56,18 @@ export const ProfileIcon = createIcon(
   </>
 );
 
+export const LighthouseIcon = createIcon(
+  <>
+    <path d="M12 2.5 10 6h4z" />
+    <path d="M10 6v3h4V6z" />
+    <path d="M8.5 9v1h7V9z" />
+    <path d="M10 10v9h4v-9z" />
+    <path d="M8 19v1.5h8V19z" />
+    <path d="M7 4.5l2 1M17 4.5l-2 1" />
+    <path d="M5.5 7h2M16.5 7h2" />
+  </>
+);
+
 export const SparkIcon = createIcon(
   <>
     <path d="m12 2.8 1.5 4.6h4.9l-3.9 2.9 1.4 4.7L12 12.7 8.1 15l1.4-4.7-3.9-2.9h4.9z" />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { knowpostService } from "@/services/knowpostService";
 import { HeartIcon, BookmarkIcon } from "@/components/icons/Icon";
 import styles from "./LikeFavBar.module.css";
@@ -25,8 +25,7 @@ const LikeFavBar = ({
   className
 }: LikeFavBarProps) => {
   const { tokens } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { openAuthModal } = useAuthModal();
   const iconSize = compact ? 18 : 20;
 
   const [likeCount, setLikeCount] = useState<number>(initialCounts?.like ?? 0);
@@ -67,9 +66,7 @@ const LikeFavBar = ({
     }
   }, [initialState?.liked, initialState?.faved]);
 
-  const mustLogin = () => {
-    navigate("/login", { state: { from: location.pathname } });
-  };
+  const mustLogin = () => openAuthModal("login");
 
   const onLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();

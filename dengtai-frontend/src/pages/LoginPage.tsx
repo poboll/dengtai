@@ -1,8 +1,9 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import type { LoginRequest } from "@/types/auth";
 import { authService } from "@/services/authService";
+import DevToast from "@/components/common/DevToast";
 import styles from "./LoginPage.module.css";
 
 type LocationState = {
@@ -16,10 +17,10 @@ const LoginPage = () => {
   const [identifier, setIdentifier] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [devTip, setDevTip] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const from = (location.state as LocationState | undefined)?.from ?? "/";
 
@@ -34,6 +35,8 @@ const LoginPage = () => {
     const timer = window.setTimeout(() => setCountdown(prev => prev - 1), 1000);
     return () => window.clearTimeout(timer);
   }, [countdown]);
+
+  const handleDismissToast = useCallback(() => setToastVisible(false), []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,7 +61,6 @@ const LoginPage = () => {
       return;
     }
     setError(null);
-    setDevTip(null);
     setSendingCode(true);
     try {
       const response = await authService.sendCode({
@@ -67,7 +69,10 @@ const LoginPage = () => {
         identifier
       });
       setCountdown(Math.max(1, response.expireSeconds ?? 300));
-      setDevTip("开发模式：验证码已打印至后端日志，可运行 grep 'code=' /tmp/dengtai-backend.log 查看");
+      if (response.devCode) {
+        setCode(response.devCode);
+        setToastVisible(true);
+      }
     } catch (err) {
       const info = err instanceof Error ? err.message : "验证码发送失败";
       setError(info);
@@ -124,7 +129,6 @@ const LoginPage = () => {
               </button>
             </div>
             <span className={styles.tips}>验证码用于校验登录，不需要输入密码。</span>
-            {devTip && <div className={styles.devTip}>{devTip}</div>}
           </div>
 
           {error ? <div className={styles.error}>{error}</div> : null}
@@ -146,6 +150,12 @@ const LoginPage = () => {
           </div>
         </form>
       </div>
+
+      <DevToast
+        message="开发模式：验证码已自动填入哦~"
+        visible={toastVisible}
+        onDismiss={handleDismissToast}
+      />
     </div>
   );
 };

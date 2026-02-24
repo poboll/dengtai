@@ -85,7 +85,8 @@ public class AuthService {
             throw new BusinessException(ErrorCode.IDENTIFIER_NOT_FOUND);
         }
         SendCodeResult result = verificationService.sendCode(request.scene(), normalized);
-        return new SendCodeResponse(result.identifier(), result.scene(), result.expireSeconds());
+        String devCode = authProperties.getVerification().isDevReturnCode() ? result.code() : null;
+        return new SendCodeResponse(result.identifier(), result.scene(), result.expireSeconds(), devCode);
     }
 
     /**
@@ -113,7 +114,7 @@ public class AuthService {
                 .phone(request.identifierType() == IdentifierType.PHONE ? identifier : null)
                 .email(request.identifierType() == IdentifierType.EMAIL ? identifier : null)
                 .nickname(generateNickname())
-                .avatar("https://static.dengtai.cn/default-avatar.png")
+                .avatar(generateAvatar(identifier))
                 .bio(null)
                 .tagsJson("[]")
                 .build();
@@ -401,13 +402,22 @@ public class AuthService {
         return new TokenResponse(tokenPair.accessToken(), tokenPair.accessTokenExpiresAt(), tokenPair.refreshToken(), tokenPair.refreshTokenExpiresAt());
     }
 
-    /**
-     * 生成默认昵称。
-     *
-     * @return 随机昵称字符串。
-     */
+    private static final String[] ADJECTIVES = {
+            "快乐的", "勇敢的", "聪明的", "温柔的", "闪亮的", "安静的", "活泼的", "自由的",
+            "神秘的", "可爱的", "优雅的", "灵动的", "明亮的", "清澈的", "温暖的", "坚定的"
+    };
+    private static final String[] NOUNS = {
+            "灯塔", "星辰", "海鸥", "白鹿", "云雀", "银杏", "雪松", "极光",
+            "萤火", "晚风", "朝露", "飞鱼", "青鸟", "月光", "山茶", "竹笛"
+    };
     private String generateNickname() {
-        return "灯塔用户" + UUID.randomUUID().toString().substring(0, 8);
+        var rng = java.util.concurrent.ThreadLocalRandom.current();
+        return ADJECTIVES[rng.nextInt(ADJECTIVES.length)] + NOUNS[rng.nextInt(NOUNS.length)];
+    }
+
+    private String generateAvatar(String identifier) {
+        String seed = UUID.nameUUIDFromBytes(identifier.getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
+        return "https://api.dicebear.com/9.x/thumbs/svg?seed=" + seed;
     }
 
     /**

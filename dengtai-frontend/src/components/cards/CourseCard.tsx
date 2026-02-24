@@ -54,6 +54,7 @@ export type CourseCardProps = {
   className?: string;
   editable?: boolean;
   onChanged?: (action: "top" | "visibility" | "delete", payload?: unknown) => void;
+  onTagClick?: (tag: string) => void;
 };
 
 const CourseCard = ({
@@ -73,7 +74,8 @@ const CourseCard = ({
   to,
   className,
   editable = false,
-  onChanged
+  onChanged,
+  onTagClick,
 }: CourseCardProps) => {
   const { tokens } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -202,7 +204,7 @@ const CourseCard = ({
         {tags?.length ? (
           <div className={styles.tagGroups}>
             {tags.map(tag => (
-              <Tag key={tag}>#{tag}</Tag>
+              <Tag key={tag} onClick={onTagClick ? () => onTagClick(tag) : undefined}>#{tag}</Tag>
             ))}
           </div>
         ) : null}

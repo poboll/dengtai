@@ -12,6 +12,7 @@ export type SendCodeResponse = {
   identifier: string;
   scene: VerificationScene;
   expireSeconds: number;
+  devCode?: string;
 };
 
 export type RegisterRequest = {

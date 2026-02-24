@@ -22,3 +22,12 @@
   background: rgba(0, 0, 0, 0.04);
   color: var(--color-text-muted);
 }
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.clickable:hover {
+  background: rgba(107, 140, 175, 0.12);
+  color: var(--color-primary-strong);
+  border-color: rgba(107, 140, 175, 0.25);
+}

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import type { HeaderTab } from "@/components/layout/MainHeader";
@@ -20,6 +21,17 @@ const CATEGORY_TABS: Array<{ id: string; label: string }> = [
   { id: "design", label: "设计" },
   { id: "security", label: "安全" },
 ];
+
+const CATEGORY_TAG_MAP: Record<string, string[]> = {
+  all: [],
+  java: ["Java", "后端", "架构"],
+  frontend: ["前端", "Vue", "React", "框架"],
+  ai: ["AI", "GPT", "Claude", "DeepSeek", "机器学习", "Agent"],
+  algo: ["算法", "竞赛", "LeetCode"],
+  devops: ["DevOps", "K8s", "容器", "云原生"],
+  design: ["设计", "UI", "产品"],
+  security: ["安全"],
+};
 
 const HOT_TOPICS = ["#系统设计", "#LeetCode", "#React", "#Java面试", "#大模型", "#K8s"];
 
@@ -57,6 +69,16 @@ const HomePage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const navigate = useNavigate();
+
+  const filteredItems = useMemo(() => {
+    if (activeTab === "all") return items;
+    const matchTags = CATEGORY_TAG_MAP[activeTab] ?? [];
+    if (!matchTags.length) return items;
+    return items.filter(item =>
+      item.tags?.some(t => matchTags.some(m => t.includes(m)))
+    );
+  }, [items, activeTab]);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,7 +130,7 @@ const HomePage = () => {
                     <div className={styles.skeletonCard} />
                   </div>
                 ))
-              : items.map(item => (
+              : filteredItems.map(item => (
                   <div key={item.id} className={styles.masonryItem}>
                     <CourseCard
                       id={item.id}
@@ -133,10 +155,11 @@ const HomePage = () => {
                           initialState={{ liked: item.liked, faved: item.faved }}
                         />
                       }
+                      onTagClick={(tag) => navigate(`/search?q=${encodeURIComponent(tag)}`)}
                     />
                   </div>
                 ))}
-            {!loading && items.length === 0 ? (
+            {!loading && filteredItems.length === 0 ? (
               <div className={styles.empty}>
                 <div className={styles.emptyIcon}>🔭</div>
                 <p>暂无内容，快去创作第一篇知文吧</p>
@@ -152,7 +175,7 @@ const HomePage = () => {
             <h3 className={styles.panelTitle}>热门话题</h3>
             <div className={styles.topicList}>
               {HOT_TOPICS.map(topic => (
-                <span key={topic} className={styles.topicTag}>{topic}</span>
+                <span key={topic} className={styles.topicTag} onClick={() => navigate(`/search?q=${encodeURIComponent(topic.replace('#', ''))}`)} role="link" tabIndex={0}>{topic}</span>
               ))}
             </div>
           </section>

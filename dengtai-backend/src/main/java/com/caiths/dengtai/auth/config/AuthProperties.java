@@ -56,6 +56,8 @@ public class AuthProperties {
         private Duration sendInterval = Duration.ofSeconds(60);
         /** 同标识每日发送上限。 */
         private int dailyLimit = 10;
+        /** 开发模式下是否在响应中返回验证码明文。 */
+        private boolean devReturnCode = false;
     }
 
     /** 密码策略配置。 */

@@ -1,15 +1,13 @@
 package com.caiths.dengtai.auth.api.dto;
 
 import com.caiths.dengtai.auth.verification.VerificationScene;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-/**
- * 发送验证码响应。
- * <p>
- * 返回规范化后的账号、场景，以及验证码有效期（秒）。
- */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record SendCodeResponse(
         String identifier,
         VerificationScene scene,
-        int expireSeconds
+        int expireSeconds,
+        String devCode
 ) {
 }
