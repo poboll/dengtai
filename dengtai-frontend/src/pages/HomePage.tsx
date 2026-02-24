@@ -113,7 +113,7 @@ const HomePage = () => {
       header={
         <MainHeader
           headline="灯塔"
-          subtitle="让思想有温度，让知识会发光"
+          subtitle="以知识为光，照亮每一程"
           tabs={tabs}
           rightSlot={<AuthStatus />}
         />

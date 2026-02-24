@@ -1,5 +1,5 @@
 package com.caiths.dengtai.auth.config;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -8,11 +8,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 /**
@@ -73,8 +75,34 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth -> oauth
+                        .bearerTokenResolver(publicPathAwareBearerTokenResolver())
+                        .jwt(Customizer.withDefaults()));
         return http.build();
+    }
+
+    /**
+     * 对公开端点跳过 token 提取，避免携带过期 token 时 JWT Filter 在 permitAll 之前返回 401。
+     */
+    private static BearerTokenResolver publicPathAwareBearerTokenResolver() {
+        final DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+        final AntPathMatcher matcher = new AntPathMatcher();
+        final List<String> publicPatterns = List.of(
+                "/api/v1/knowposts/*/qa/stream",
+                "/api/v1/ai/chat/stream",
+                "/api/v1/knowposts/feed",
+                "/api/v1/knowposts/detail/*",
+                "/api/v1/search",
+                "/api/v1/search/suggest",
+                "/api/v1/auth/**"
+        );
+        return request -> {
+            String path = request.getRequestURI();
+            for (String pattern : publicPatterns) {
+                if (matcher.match(pattern, path)) return null;
+            }
+            return delegate.resolve(request);
+        };
     }
 
     /**

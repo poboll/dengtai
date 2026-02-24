@@ -28,7 +28,7 @@ const AboutPage = () => (
     header={
       <MainHeader
         headline="关于灯塔"
-        subtitle="让思想有温度，让知识会发光"
+        subtitle="以知识为光，照亮每一程"
         rightSlot={<AuthStatus />}
       />
     }
@@ -38,7 +38,7 @@ const AboutPage = () => (
       <section className={styles.hero}>
         <div className={styles.heroIcon}>🏮</div>
         <h1 className={styles.heroTitle}>灯塔</h1>
-        <p className={styles.heroSlogan}>让思想有温度，让知识会发光</p>
+        <p className={styles.heroSlogan}>以知识为光，照亮每一程</p>
         <p className={styles.heroDesc}>
           灯塔是一个面向开发者的知识分享与智能问答平台，融合 AI 大模型与 RAG 检索增强技术，
           为技术社区提供高质量的内容创作、发现与交流体验。

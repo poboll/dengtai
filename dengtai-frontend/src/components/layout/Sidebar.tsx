@@ -36,7 +36,7 @@ const Sidebar = () => {
       <div className={styles.footer}>
         <Link to="/about" className={styles.footerLink}>
           <span className={styles.footerBrand}>灯塔</span>
-          <div className={styles.footerSlogan}>让知识发光</div>
+          <div className={styles.footerSlogan}>以知识为光</div>
         </Link>
       </div>
     </aside>
