@@ -1,6 +1,7 @@
 package com.caiths.dengtai.ai.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.deepseek.DeepSeekChatOptions;
 import org.springframework.ai.document.Document;
@@ -9,6 +10,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +18,9 @@ import java.util.stream.Collectors;
  * 全局 AI 对话服务：
  * - 在整个向量库范围内语义检索相关知文切片
  * - 将检索结果作为上下文注入 DeepSeek，流式返回回答
+ * - 当向量检索不可用时（如 embedding 服务异常），自动降级为纯对话模式
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GlobalAiChatService {
@@ -33,14 +37,7 @@ public class GlobalAiChatService {
             """;
 
     public Flux<String> streamAnswer(String question, int topK) {
-        List<Document> docs = vectorStore.similaritySearch(
-                SearchRequest.builder()
-                        .query(question)
-                        .topK(Math.max(1, topK))
-                        .similarityThreshold(0.5)
-                        .build()
-        );
-
+        List<Document> docs = safeSearch(question, topK);
         String context = buildContext(docs);
         String userMessage = buildUserMessage(question, context);
 
@@ -55,6 +52,21 @@ public class GlobalAiChatService {
                         .build())
                 .stream()
                 .content();
+    }
+
+    private List<Document> safeSearch(String question, int topK) {
+        try {
+            return vectorStore.similaritySearch(
+                    SearchRequest.builder()
+                            .query(question)
+                            .topK(Math.max(1, topK))
+                            .similarityThreshold(0.5)
+                            .build()
+            );
+        } catch (Exception e) {
+            log.warn("向量检索失败，降级为纯对话模式: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     private String buildContext(List<Document> docs) {

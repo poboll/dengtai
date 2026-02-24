@@ -62,17 +62,17 @@ spring:
           model: deepseek-chat
           temperature: 0.8
     openai:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: ${OPENAI_API_KEY:PLACEHOLDER_NOT_CONFIGURED}
+      base-url: https://api.siliconflow.cn/v1
+      api-key: ${SILICONFLOW_API_KEY:PLACEHOLDER_NOT_CONFIGURED}
       embedding:
         options:
-          model: text-embedding-v4 # 向量模型
-          dimensions: 1536
+          model: BAAI/bge-large-zh-v1.5
+          dimensions: 1024
     vectorstore:
       elasticsearch:
         initialize-schema: true
         index-name: dengtai-ai-index
-        dimensions: 1536 # 一定要和上面的 dimensions 一致，不然会报错
+        dimensions: 1024
   elasticsearch:
     uris: http://localhost:9012
 
