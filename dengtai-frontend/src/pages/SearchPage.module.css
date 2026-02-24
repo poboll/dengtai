@@ -1,127 +1,73 @@
-.searchArea {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  padding: 24px 28px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-}
-
-.history {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.historyItem {
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--glass-bg);
-  border: 1px solid rgba(74, 111, 148, 0.14);
-  color: var(--color-text-strong);
-  font-weight: 500;
-  transition: all var(--transition-base);
-}
-
-.historyItem:hover {
-  background: rgba(74, 111, 148, 0.06);
-  border-color: rgba(74, 111, 148, 0.30);
-}
-
-.suggestions {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
 }
 
-.suggestionCard {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px;
+.gridItem {
+  min-width: 0;
+}
+
+.skeletonCard {
   border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-card);
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--color-text-strong);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  height: 260px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.07) 50%,
+    rgba(0, 0, 0, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
-.suggestionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card-hover);
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-}
-
-.controlInput {
-  height: 34px;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  transition: border-color var(--transition-base);
-}
-
-.controlInput:focus {
-  border-color: rgba(74, 111, 148, 0.38);
-  outline: none;
-}
-
-.results {
+.emptyState {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: var(--color-text-muted);
 }
 
-.resultItem {
-  padding: 16px;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.6;
 }
 
-.resultItem:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-}
-
-.resultTitle {
+.emptyTitle {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-strong);
+  margin: 0;
 }
 
-.snippet {
-  margin-top: 8px;
-  color: var(--color-text);
+.emptyDesc {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
 }
 
-.snippet em {
-  background: rgba(143, 168, 194, 0.15);
-  border-radius: 3px;
-  padding: 0 2px;
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
 }
 
 .loadMoreBtn {
-  align-self: center;
   border: none;
   border-radius: var(--radius-pill);
-  padding: 10px 16px;
+  padding: 10px 24px;
   background: var(--color-primary);
   color: #fff;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   box-shadow: var(--shadow-glow);
   transition: all var(--transition-base);
@@ -134,9 +80,17 @@
 
 .loginHint {
   margin-bottom: 12px;
-  padding: 8px 12px;
+  padding: 10px 16px;
   border-radius: var(--radius-md);
-  background: #f0f4f8;
-  color: #5a6d80;
+  background: rgba(107, 140, 175, 0.08);
+  color: var(--color-text-muted);
   font-size: 13px;
+  border: 1px solid rgba(107, 140, 175, 0.12);
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }

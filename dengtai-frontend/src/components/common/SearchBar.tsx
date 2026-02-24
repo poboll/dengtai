@@ -6,7 +6,7 @@ type SearchBarProps = {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
-  onSubmit?: () => void;
+  onSubmit?: (value: string) => void;
   buttonLabel?: string;
   suggestions?: string[];
   suggestLoading?: boolean;
@@ -31,11 +31,11 @@ const SearchBar = ({ placeholder, value, onChange, onSubmit, buttonLabel = "æœç
         onBlur={() => setTimeout(() => setFocused(false), 120)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            onSubmit?.();
+            onSubmit?.(value);
           }
         }}
       />
-      <button className={styles.button} type="button" onClick={onSubmit}>
+      <button className={styles.button} type="button" onClick={() => onSubmit?.(value)}>
         {buttonLabel}
       </button>
 
