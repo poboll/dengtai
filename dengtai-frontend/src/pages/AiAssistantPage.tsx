@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import AppLayout from "@/components/layout/AppLayout";
 import { PlusIcon, SendIcon } from "@/components/icons/Icon";
+import { fetchSSE } from "@/services/sseStream";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./AiAssistantPage.module.css";
 
 type Role = "user" | "assistant";
@@ -51,6 +53,11 @@ const AiAssistantPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const pendingRef = useRef("");
+  const rafRef = useRef(0);
+  const streamDoneRef = useRef(false);
+  const activeMsgIdRef = useRef<string | null>(null);
+  const { tokens } = useAuth();
 
   const activeSession = sessions.find((s) => s.id === activeId) ?? sessions[0];
 
@@ -76,82 +83,72 @@ const AiAssistantPage = () => {
   const handleSend = useCallback(async () => {
     const q = input.trim();
     if (!q || streaming) return;
-
     setInput("");
     setStreaming(true);
-
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: q,
-    };
-    const assistantMsgId = crypto.randomUUID();
-    const assistantMsg: Message = {
-      id: assistantMsgId,
-      role: "assistant",
-      content: "",
-      streaming: true,
-    };
-
-    // 用第一条用户消息作为会话标题
+    pendingRef.current = "";
+    streamDoneRef.current = false;
+    const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: q };
+    const aId = crypto.randomUUID();
+    activeMsgIdRef.current = aId;
+    const assistantMsg: Message = { id: aId, role: "assistant", content: "", streaming: true };
     updateSession(activeId, (s) => ({
       ...s,
       title: s.messages.length === 1 ? q.slice(0, 30) : s.title,
       messages: [...s.messages, userMsg, assistantMsg],
     }));
-
-    abortRef.current = new AbortController();
-    try {
-      const url = `/api/v1/ai/chat/stream?question=${encodeURIComponent(q)}&topK=5`;
-      const resp = await fetch(url, { signal: abortRef.current.signal });
-      if (!resp.ok || !resp.body) throw new Error("请求失败");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        // SSE 格式: "data: <text>\n\n"
-        const parts = buffer.split("\n\n");
-        buffer = parts.pop() ?? "";
-        for (const part of parts) {
-          const line = part.startsWith("data: ") ? part.slice(6) : part;
-          if (line === "[DONE]") break;
-          updateSession(activeId, (s) => ({
-            ...s,
-            messages: s.messages.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, content: m.content + line }
-                : m
-            ),
-          }));
-        }
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name !== "AbortError") {
+    const tick = () => {
+      const p = pendingRef.current;
+      const mid = activeMsgIdRef.current;
+      if (p.length > 0 && mid) {
+        const take = p.length > 200 ? 10 : p.length > 50 ? 3 : 1;
+        const chunk = p.slice(0, take);
+        pendingRef.current = p.slice(take);
         updateSession(activeId, (s) => ({
           ...s,
           messages: s.messages.map((m) =>
-            m.id === assistantMsgId
-              ? { ...m, content: "⚠️ 请求失败，请稍后重试。" }
-              : m
+            m.id === mid ? { ...m, content: m.content + chunk } : m
           ),
         }));
+        rafRef.current = requestAnimationFrame(tick);
+      } else if (streamDoneRef.current && p.length === 0) {
+        if (mid) {
+          updateSession(activeId, (s) => ({
+            ...s,
+            messages: s.messages.map((m) =>
+              m.id === mid ? { ...m, streaming: false } : m
+            ),
+          }));
+        }
+        setStreaming(false);
+        activeMsgIdRef.current = null;
+      } else {
+        rafRef.current = requestAnimationFrame(tick);
       }
-    } finally {
-      updateSession(activeId, (s) => ({
-        ...s,
-        messages: s.messages.map((m) =>
-          m.id === assistantMsgId ? { ...m, streaming: false } : m
-        ),
-      }));
-      setStreaming(false);
-    }
-  }, [input, streaming, activeId, updateSession]);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const path = `/api/v1/ai/chat/stream?question=${encodeURIComponent(q)}&topK=5`;
+    fetchSSE(path, {
+      onChunk: (text) => { pendingRef.current += text; },
+      onDone: () => { streamDoneRef.current = true; },
+      onError: (err) => {
+        streamDoneRef.current = true;
+        if (err.name !== "AbortError") {
+          pendingRef.current = "";
+          updateSession(activeId, (s) => ({
+            ...s,
+            messages: s.messages.map((m) =>
+              m.id === aId ? { ...m, content: "⚠️ 请求失败，请稍后重试。", streaming: false } : m
+            ),
+          }));
+          setStreaming(false);
+        }
+      },
+      signal: controller.signal,
+      accessToken: tokens?.accessToken,
+    });
+  }, [input, streaming, activeId, updateSession, tokens?.accessToken]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

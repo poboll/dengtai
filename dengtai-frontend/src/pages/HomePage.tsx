@@ -33,7 +33,7 @@ const ACTIVE_CREATORS: Creator[] = [
 const PLATFORM_STATS = [
   { label: "创作者", value: "2,847" },
   { label: "知文", value: "18,392" },
-  { label: "���周新增", value: "234" },
+  { label: "本周新增", value: "234" },
 ];
 
 type FeedItem = {
