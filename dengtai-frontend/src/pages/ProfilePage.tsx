@@ -6,6 +6,7 @@ import SectionHeader from "@/components/common/SectionHeader";
 import AuthStatus from "@/features/auth/AuthStatus";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./ProfilePage.module.css";
+import { useAuthModal } from "@/context/AuthModalContext";
 import feedStyles from "./HomePage.module.css";
 import CourseCard from "@/components/cards/CourseCard";
 import LikeFavBar from "@/components/common/LikeFavBar";
@@ -14,6 +15,12 @@ import RelationCounters from "@/components/common/RelationCounters";
 
 const ProfilePage = () => {
   const { user, tokens } = useAuth();
+  const { openAuthModal } = useAuthModal();
+
+  // 未登录路由守卫：触发登录弹窗
+  useEffect(() => {
+    if (!user && !tokens) openAuthModal("login");
+  }, [user, tokens, openAuthModal]);
   const displayName = user?.nickname ?? user?.phone ?? user?.email ?? "灯塔用户";
   const avatarInitial = displayName.trim().charAt(0) || "知";
 

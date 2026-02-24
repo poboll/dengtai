@@ -7,6 +7,8 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import AiAssistantPage from "./pages/AiAssistantPage";
+import AboutPage from "./pages/AboutPage";
+import StatusPage from "./pages/StatusPage";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/edit" element={<EditProfilePage />} />
       <Route path="/post/:id" element={<CourseDetailPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/status" element={<StatusPage />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

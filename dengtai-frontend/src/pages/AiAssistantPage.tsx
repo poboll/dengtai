@@ -146,9 +146,9 @@ const AiAssistantPage = () => {
         }
       },
       signal: controller.signal,
-      accessToken: tokens?.accessToken,
+      accessToken: null,
     });
-  }, [input, streaming, activeId, updateSession, tokens?.accessToken]);
+  }, [input, streaming, activeId, updateSession]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

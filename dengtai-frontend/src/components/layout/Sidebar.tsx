@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { AiIcon, CreateIcon, HomeIcon, LighthouseIcon, ProfileIcon, SearchIcon, StudyIcon } from "@/components/icons/Icon";
 import styles from "./Sidebar.module.css";
 
@@ -14,9 +14,9 @@ const navItems = [
 const Sidebar = () => {
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.logo}>
+      <Link to="/about" className={styles.logoLink}>
         <LighthouseIcon width={28} height={28} stroke="none" fill="#fff" />
-      </div>
+      </Link>
       <nav className={styles.nav}>
         {navItems.map(({ to, label, Icon }) => (
           <NavLink
@@ -34,8 +34,10 @@ const Sidebar = () => {
       </nav>
       <div className={styles.spacer} />
       <div className={styles.footer}>
-        <span className={styles.footerBrand}>灯塔</span>
-        <div className={styles.footerSlogan}>让知识发光</div>
+        <Link to="/about" className={styles.footerLink}>
+          <span className={styles.footerBrand}>灯塔</span>
+          <div className={styles.footerSlogan}>让知识发光</div>
+        </Link>
       </div>
     </aside>
   );

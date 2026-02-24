@@ -51,6 +51,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        // SpringDoc OpenAPI / Swagger UI
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         // 公开内容：首页 Feed 不需要登录
                         .requestMatchers("/api/v1/knowposts/feed").permitAll()
                         // 知文详情（公开已发布内容，非公开由服务层校验）
