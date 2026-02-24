@@ -90,8 +90,8 @@ const LikeFavBar = ({
         setLiked(resp.liked);
         if (resp.changed && !resp.liked) setLikeCount((c) => Math.max(0, c - 1));
       }
-    } catch {
-      // 可选：提示错误
+    } catch (e) {
+      console.warn("like failed", e);
     } finally {
       setLoadingLike(false);
     }
@@ -116,8 +116,8 @@ const LikeFavBar = ({
         setFaved(resp.faved);
         if (resp.changed && !resp.faved) setFavCount((c) => Math.max(0, c - 1));
       }
-    } catch {
-      // 可选：提示错误
+    } catch (e) {
+      console.warn("fav failed", e);
     } finally {
       setLoadingFav(false);
     }

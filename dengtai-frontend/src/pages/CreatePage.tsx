@@ -122,7 +122,7 @@ const CreatePage = () => {
       });
 
       // 4) 生成/使用摘要并保存元数据（标题、标签、摘要等）
-      const description = summary.trim();
+      const description = summary.trim() || content.replace(/[#*_~`>\[\]()!|\\-]/g, "").trim().slice(0, 50);
       await knowpostService.update(id, {
         title: title.trim(),
         tags: tags.length ? tags : undefined,

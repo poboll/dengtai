@@ -328,6 +328,19 @@
   white-space: pre-wrap;
 }
 
+.markdownStreaming::after {
+  content: "▋";
+  display: inline;
+  animation: blink 0.6s steps(2, start) infinite;
+  color: var(--color-primary);
+  font-weight: 300;
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  to { opacity: 0; }
+}
+
 .ragPlaceholder {
   color: var(--color-text-muted);
 }

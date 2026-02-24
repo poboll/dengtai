@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import Tag from "@/components/common/Tag";
@@ -14,39 +14,45 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LikeFavBar from "@/components/common/LikeFavBar";
 import FollowButton from "@/components/common/FollowButton";
+import { fetchSSE } from "@/services/sseStream";
+
+const parseAvatarUserId = (url?: string): number | undefined => {
+  if (!url) return undefined;
+  const m = url.match(/\/avatars\/(\d+)-/);
+  return m ? Number(m[1]) : undefined;
+};
+
+const RAG_TOP_K = 5;
+const RAG_MAX_TOKENS = 1024;
 
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { tokens, user } = useAuth();
   const [detail, setDetail] = useState<KnowpostDetailResponse | null>(null);
-  const [activeImage, setActiveImage] = useState(0);
-  const [contentText, setContentText] = useState<string>("");
+  const [contentText, setContentText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const [visibleCount, setVisibleCount] = useState<number>(0);
-  const [contentError, setContentError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(0);
   const previewBoxRef = useRef<HTMLDivElement | null>(null);
   const [showNavLeft, setShowNavLeft] = useState(false);
   const [showNavRight, setShowNavRight] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
-  // RAG 问答状态
-  const [ragQuestion, setRagQuestion] = useState<string>("");
-  const [ragAnswer, setRagAnswer] = useState<string>("");
-  const [ragLoading, setRagLoading] = useState<boolean>(false);
-  const [ragError, setRagError] = useState<string | null>(null);
-  const ragESRef = useRef<EventSource | null>(null);
-  const [ragTopK, setRagTopK] = useState<number>(5);
-  const [ragMaxTokens, setRagMaxTokens] = useState<number>(1024);
-  // 从头像 URL 推断作者 ID（示例：.../avatars/3-xxxx.jpg → 3）
-  const parseAvatarUserId = (url?: string): number | undefined => {
-    if (!url) return undefined;
-    const m = url.match(/\/avatars\/(\d+)-/);
-    return m ? Number(m[1]) : undefined;
-  };
 
+  // RAG 问答状态
+  const [ragQuestion, setRagQuestion] = useState("");
+  const [ragAnswer, setRagAnswer] = useState("");
+  const [ragLoading, setRagLoading] = useState(false);
+  const [ragError, setRagError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const pendingCharsRef = useRef("");
+  const displayedRef = useRef("");
+  const rafRef = useRef(0);
+  const streamDoneRef = useRef(false);
+
+  // 加载详情 + 正文
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -56,8 +62,6 @@ const CourseDetailPage = () => {
         const resp = await knowpostService.detail(id, tokens?.accessToken ?? undefined);
         if (cancelled) return;
         setDetail(resp);
-        setActiveImage(0);
-        // 异步加载正文内容
         if (resp.contentUrl) {
           const allowAnonymous = resp.visible === "public";
           if (allowAnonymous || !!tokens?.accessToken) {
@@ -70,7 +74,7 @@ const CourseDetailPage = () => {
                 setContentText(text);
                 setContentError(null);
               }
-            } catch (e) {
+            } catch {
               if (!cancelled) setContentError("正文暂不可读，可能为非公开或跨域受限");
             }
           } else {
@@ -86,16 +90,13 @@ const CourseDetailPage = () => {
     return () => { cancelled = true; };
   }, [id, tokens?.accessToken]);
 
-  // 计算一行可展示的图片数量
+  // 图片行宽度计算
   useEffect(() => {
     const calc = () => {
       const el = rowRef.current;
       if (!el) return;
-      const width = el.clientWidth;
-      const itemW = 180;
-      const gap = 12;
-      const count = Math.max(1, Math.floor((width + gap) / (itemW + gap)));
-      setVisibleCount(count);
+      const w = el.clientWidth;
+      setVisibleCount(Math.max(1, Math.floor((w + 12) / 192)));
     };
     calc();
     window.addEventListener("resize", calc);
@@ -105,10 +106,7 @@ const CourseDetailPage = () => {
   useEffect(() => {
     const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     setIsTouch(touch);
-    if (touch) {
-      setShowNavLeft(true);
-      setShowNavRight(true);
-    }
+    if (touch) { setShowNavLeft(true); setShowNavRight(true); }
   }, []);
 
   const handlePreviewMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -128,123 +126,112 @@ const CourseDetailPage = () => {
     setShowNavRight(false);
   };
 
-  const openPreview = (index: number) => {
-    setPreviewIndex(index);
-    setPreviewOpen(true);
-  };
+  const openPreview = (index: number) => { setPreviewIndex(index); setPreviewOpen(true); };
+  const prevImage = () => { if (!detail?.images?.length) return; setPreviewIndex(i => (i - 1 + detail.images.length) % detail.images.length); };
+  const nextImage = () => { if (!detail?.images?.length) return; setPreviewIndex(i => (i + 1) % detail.images.length); };
 
-  const prevImage = () => {
-    if (!detail?.images?.length) return;
-    setPreviewIndex((i) => (i - 1 + detail.images.length) % detail.images.length);
-  };
-
-  const nextImage = () => {
-    if (!detail?.images?.length) return;
-    setPreviewIndex((i) => (i + 1) % detail.images.length);
-  };
-
-  // 启动 RAG 流式问答
-  const startRag = () => {
-    if (!id) return;
-    const q = ragQuestion.trim();
-    if (!q) return;
-    if (detail && detail.visible !== "public") {
-      setRagError("仅公开知文支持问答");
-      return;
-    }
-    setRagError(null);
-    setRagAnswer("");
-    // 关闭之前的连接
-    if (ragESRef.current) {
-      try { ragESRef.current.close(); } catch {}
-      ragESRef.current = null;
-    }
-    const url = `/api/v1/knowposts/${id}/qa/stream?question=${encodeURIComponent(q)}&topK=${ragTopK}&maxTokens=${ragMaxTokens}`;
-    const es = new EventSource(url);
-    ragESRef.current = es;
-    setRagLoading(true);
-    es.onmessage = (e) => {
-      setRagAnswer((prev) => prev + (e.data ?? ""));
-    };
-    es.onerror = () => {
-      setRagLoading(false);
-      // 不展示“连接中断或后端异常”，静默关闭连接
-      try { es.close(); } catch {}
-      ragESRef.current = null;
-    };
-  };
-
+  // RAG: 停止流式
   const stopRag = () => {
-    if (ragESRef.current) {
-      try { ragESRef.current.close(); } catch {}
-      ragESRef.current = null;
+    if (abortControllerRef.current) { abortControllerRef.current.abort(); abortControllerRef.current = null; }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
+    if (pendingCharsRef.current) {
+      displayedRef.current += pendingCharsRef.current;
+      pendingCharsRef.current = "";
+      setRagAnswer(displayedRef.current);
     }
     setRagLoading(false);
   };
 
+  // RAG: 启动流式问答（fetchSSE + 自适应打字机）
+  const startRag = () => {
+    if (!id) return;
+    const q = ragQuestion.trim();
+    if (!q) return;
+    if (detail && detail.visible !== "public") { setRagError("仅公开知文支持问答"); return; }
+
+    stopRag();
+    setRagError(null);
+    setRagAnswer("");
+    pendingCharsRef.current = "";
+    displayedRef.current = "";
+    streamDoneRef.current = false;
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setRagLoading(true);
+
+    const tick = () => {
+      const pending = pendingCharsRef.current;
+      if (pending.length > 0) {
+        const take = pending.length > 200 ? 10 : pending.length > 50 ? 3 : 1;
+        const n = Math.min(take, pending.length);
+        displayedRef.current += pending.slice(0, n);
+        pendingCharsRef.current = pending.slice(n);
+        setRagAnswer(displayedRef.current);
+        rafRef.current = requestAnimationFrame(tick);
+      } else if (streamDoneRef.current) {
+        rafRef.current = 0;
+        setRagLoading(false);
+      } else {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    const path = `/api/v1/knowposts/${id}/qa/stream?question=${encodeURIComponent(q)}&topK=${RAG_TOP_K}&maxTokens=${RAG_MAX_TOKENS}`;
+    fetchSSE(path, {
+      onChunk: (text) => { pendingCharsRef.current += text; },
+      onDone: () => { streamDoneRef.current = true; abortControllerRef.current = null; },
+      onError: (err) => { streamDoneRef.current = true; abortControllerRef.current = null; setRagError(err.message); },
+      signal: controller.signal,
+      accessToken: tokens?.accessToken,
+    });
+  };
+
+  // 页面卸载清理
   useEffect(() => {
     return () => {
-      // 页面卸载时关闭 SSE
-      if (ragESRef.current) {
-        try { ragESRef.current.close(); } catch {}
-        ragESRef.current = null;
-      }
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
+  // 作者信息
+  const authorId = detail?.authorId ? Number(detail.authorId) : parseAvatarUserId(detail?.authorAvatar);
+  const isSelf = (authorId != null && user?.id === authorId) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
+
   return (
     <AppLayout
-      header={
-        <MainHeader
-          headline={detail?.title ?? ""}
-          subtitle=""
-          rightSlot={<AuthStatus />}
-        />
-      }
+      header={<MainHeader headline={detail?.title ?? ""} subtitle="" rightSlot={<AuthStatus />} />}
       variant="cardless"
     >
       <article className={styles.detailCard}>
         {error ? <div style={{ color: "var(--color-danger)" }}>{error}</div> : null}
         {detail?.images?.length ? (
           <div ref={rowRef} className={styles.imageRow}>
-            {(detail.images.slice(0, visibleCount)).map((src, idx) => {
-              const isLastVisible = idx === visibleCount - 1 && detail.images.length > visibleCount;
+            {detail.images.slice(0, visibleCount).map((src, idx) => {
+              const isLast = idx === visibleCount - 1 && detail.images.length > visibleCount;
               return (
                 <div key={src + idx} className={styles.imageItem} onClick={() => openPreview(idx)}>
                   <img className={styles.image} src={src} alt={detail.title} />
-                  {isLastVisible ? (
-                    <div className={styles.moreBadge}>+{detail.images.length - visibleCount}</div>
-                  ) : null}
+                  {isLast ? <div className={styles.moreBadge}>+{detail.images.length - visibleCount}</div> : null}
                 </div>
               );
             })}
-            {detail.images.length <= visibleCount
-              ? null
-              : null}
           </div>
         ) : null}
+
         <div className={styles.titleBlock}>
-          <div className={styles.titleRow}></div>
           <div className={styles.meta}>
-            {detail?.authorAvatar ? (
-              <img className={styles.authorAvatar} src={detail.authorAvatar} alt={detail.authorNickname} />
-            ) : null}
+            {detail?.authorAvatar ? <img className={styles.authorAvatar} src={detail.authorAvatar} alt={detail.authorNickname} /> : null}
             <span className={styles.authorName}>{detail?.authorNickname ?? ""}</span>
-            {(() => {
-              const derivedId = detail?.authorId ?? parseAvatarUserId(detail?.authorAvatar);
-              const isSelf = (derivedId && user?.id === derivedId) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
-              return derivedId && !isSelf ? <FollowButton targetUserId={derivedId} /> : null;
-            })()}
+            {authorId && !isSelf ? <FollowButton targetUserId={authorId} /> : null}
           </div>
           <div className={styles.tagList}>
-            {(detail?.tags ?? []).map(tag => (
-              <Tag key={tag}>#{tag}</Tag>
-            ))}
+            {(detail?.tags ?? []).map(tag => <Tag key={tag}>#{tag}</Tag>)}
           </div>
           <div className={styles.meta}>
-            {detail?.publishTime ? (
-              <span>{new Date(detail.publishTime).toLocaleDateString("zh-CN")}</span>
-            ) : null}
+            {detail?.publishTime ? <span>{new Date(detail.publishTime).toLocaleDateString("zh-CN")}</span> : null}
           </div>
           <div className={styles.bottomBar}>
             {detail ? (
@@ -263,25 +250,16 @@ const CourseDetailPage = () => {
           <div className={styles.contentMain}>
             <div className={`${styles.body} ${styles.markdown}`}>
               {contentText ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({ node, ...props }) => (
-                      <a {...props} target="_blank" rel="noreferrer" />
-                    ),
-                    img: ({ node, ...props }) => (
-                      <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />
-                    ),
-                  }}
-                >
-                  {contentText}
-                </ReactMarkdown>
-              ) : (
-                "暂无内容"
-              )}
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                  a: ({ node: _n, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
+                  img: ({ node: _n, ...props }) => <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />,
+                }}>{contentText}</ReactMarkdown>
+              ) : "暂无内容"}
             </div>
             {contentError ? (
-              <div style={{ color: "var(--color-danger)" }}>{contentError} {detail?.contentUrl ? (<a href={detail.contentUrl} target="_blank" rel="noreferrer">查看原文</a>) : null}</div>
+              <div style={{ color: "var(--color-danger)" }}>
+                {contentError} {detail?.contentUrl ? <a href={detail.contentUrl} target="_blank" rel="noreferrer">查看原文</a> : null}
+              </div>
             ) : null}
           </div>
 
@@ -292,42 +270,23 @@ const CourseDetailPage = () => {
                 placeholder="围绕本知文提问，例如：这篇知文的核心观点是什么？"
                 value={ragQuestion}
                 onChange={(e) => setRagQuestion(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) startRag(); }}
               />
               <div className={styles.ragControls}>
-                <button
-                  type="button"
-                  className={`${styles.ragBtn} ${styles.ragBtnPrimary}`}
-                  onClick={startRag}
-                  disabled={ragLoading || !ragQuestion.trim()}
-                >
+                <button type="button" className={`${styles.ragBtn} ${styles.ragBtnPrimary}`} onClick={startRag} disabled={ragLoading || !ragQuestion.trim()}>
                   {ragLoading ? "生成中…" : "发送"}
                 </button>
-                <button type="button" className={`${styles.ragBtn} ${styles.ragBtnGhost}`} onClick={stopRag} disabled={!ragLoading}>
-                  停止
-                </button>
+                <button type="button" className={`${styles.ragBtn} ${styles.ragBtnGhost}`} onClick={stopRag} disabled={!ragLoading}>停止</button>
               </div>
-              <div className={styles.ragHint}>
-                说明：仅“公开”知文支持问答，答案基于当前知文的索引片段实时生成。
-              </div>
-              {ragError ? (
-                <div style={{ color: "var(--color-danger)" }}>{ragError}</div>
-              ) : null}
+              <div className={styles.ragHint}>说明：仅"公开"知文支持问答，答案基于当前知文的索引片段实时生成。</div>
+              {ragError ? <div style={{ color: "var(--color-danger)" }}>{ragError}</div> : null}
               <div className={styles.ragAnswer}>
                 {ragAnswer ? (
-                  <div className={styles.markdown}>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noreferrer" />
-                        ),
-                        img: ({ node, ...props }) => (
-                          <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />
-                        ),
-                      }}
-                    >
-                      {ragAnswer}
-                    </ReactMarkdown>
+                  <div className={`${styles.markdown} ${ragLoading ? styles.markdownStreaming : ""}`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                      a: ({ node: _n, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
+                      img: ({ node: _n, ...props }) => <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />,
+                    }}>{ragAnswer}</ReactMarkdown>
                   </div>
                 ) : (
                   <div className={styles.ragPlaceholder}>
@@ -341,28 +300,12 @@ const CourseDetailPage = () => {
 
         {previewOpen && detail?.images?.length ? (
           <div className={styles.previewOverlay} onClick={() => setPreviewOpen(false)}>
-            <div
-              className={styles.previewBox}
-              ref={previewBoxRef}
-              onMouseMove={handlePreviewMouseMove}
-              onMouseLeave={handlePreviewMouseLeave}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className={styles.previewBox} ref={previewBoxRef} onMouseMove={handlePreviewMouseMove} onMouseLeave={handlePreviewMouseLeave} onClick={(e) => e.stopPropagation()}>
               <img className={styles.previewImage} src={detail.images[previewIndex]} alt={detail.title} />
-              <button
-                type="button"
-                className={`${styles.navButton} ${styles.navButtonLeft} ${showNavLeft ? styles.navButtonVisible : ""}`}
-                onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                aria-label="上一张"
-              >
+              <button type="button" className={`${styles.navButton} ${styles.navButtonLeft} ${showNavLeft ? styles.navButtonVisible : ""}`} onClick={(e) => { e.stopPropagation(); prevImage(); }} aria-label="上一张">
                 <ArrowRightIcon width={24} height={24} style={{ transform: "rotate(180deg)" }} />
               </button>
-              <button
-                type="button"
-                className={`${styles.navButton} ${styles.navButtonRight} ${showNavRight ? styles.navButtonVisible : ""}`}
-                onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                aria-label="下一张"
-              >
+              <button type="button" className={`${styles.navButton} ${styles.navButtonRight} ${showNavRight ? styles.navButtonVisible : ""}`} onClick={(e) => { e.stopPropagation(); nextImage(); }} aria-label="下一张">
                 <ArrowRightIcon width={24} height={24} />
               </button>
               <button type="button" className={styles.closeButton} onClick={(e) => { e.stopPropagation(); setPreviewOpen(false); }} aria-label="关闭">✕</button>

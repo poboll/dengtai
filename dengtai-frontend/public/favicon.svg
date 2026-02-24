@@ -1,10 +1,27 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="g" x1="12" y1="10" x2="52" y2="50" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFB867" />
-      <stop offset="1" stop-color="#FF7A22" />
+      <stop stop-color="#FFB867"/>
+      <stop offset="1" stop-color="#FF7A22"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="20" fill="url(#g)" />
-  <path d="M32 14L37.6 29H53L40.5 38.5L45.9 54L32 43.8L18.1 54L23.5 38.5L11 29H26.4L32 14Z" fill="white"/>
+  <rect width="64" height="64" rx="20" fill="url(#g)"/>
+  <!-- 灯塔塔身 -->
+  <path d="M28 48 L26 28 L38 28 L36 48 Z" fill="white"/>
+  <!-- 灯塔顶部灯室 -->
+  <rect x="24" y="22" width="16" height="6" rx="1.5" fill="white"/>
+  <!-- 灯塔灯光 -->
+  <circle cx="32" cy="19" r="4" fill="white" opacity="0.95"/>
+  <!-- 光芒 -->
+  <line x1="32" y1="11" x2="32" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="15" x2="26.5" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="15" x2="37.5" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="22" y1="19" x2="25" y2="19" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="42" y1="19" x2="39" y2="19" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- 塔身横纹 -->
+  <line x1="26.8" y1="33" x2="37.2" y2="33" stroke="#FF7A22" stroke-width="1" opacity="0.3"/>
+  <line x1="27.2" y1="38" x2="36.8" y2="38" stroke="#FF7A22" stroke-width="1" opacity="0.3"/>
+  <line x1="27.6" y1="43" x2="36.4" y2="43" stroke="#FF7A22" stroke-width="1" opacity="0.3"/>
+  <!-- 底座 -->
+  <rect x="22" y="48" width="20" height="4" rx="2" fill="white"/>
 </svg>
