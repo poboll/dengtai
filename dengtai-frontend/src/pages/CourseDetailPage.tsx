@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import MainHeader from "@/components/layout/MainHeader";
 import Tag from "@/components/common/Tag";
-import SectionHeader from "@/components/common/SectionHeader";
 import { ArrowRightIcon } from "@/components/icons/Icon";
 import AuthStatus from "@/features/auth/AuthStatus";
 import styles from "./CourseDetailPage.module.css";
@@ -25,6 +24,11 @@ const parseAvatarUserId = (url?: string): number | undefined => {
 const RAG_TOP_K = 5;
 const RAG_MAX_TOKENS = 1024;
 
+const mdComponents = {
+  a: ({ node: _n, ...props }: any) => <a {...props} target="_blank" rel="noreferrer" />,
+  img: ({ node: _n, ...props }: any) => <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />,
+};
+
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { tokens, user } = useAuth();
@@ -32,16 +36,16 @@ const CourseDetailPage = () => {
   const [contentText, setContentText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
+
+  // Image preview
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
-  const rowRef = useRef<HTMLDivElement | null>(null);
-  const [visibleCount, setVisibleCount] = useState(0);
   const previewBoxRef = useRef<HTMLDivElement | null>(null);
   const [showNavLeft, setShowNavLeft] = useState(false);
   const [showNavRight, setShowNavRight] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
 
-  // RAG 问答状态
+  // RAG Q&A
   const [ragQuestion, setRagQuestion] = useState("");
   const [ragAnswer, setRagAnswer] = useState("");
   const [ragLoading, setRagLoading] = useState(false);
@@ -52,7 +56,7 @@ const CourseDetailPage = () => {
   const rafRef = useRef(0);
   const streamDoneRef = useRef(false);
 
-  // 加载详情 + 正文
+  // ── Fetch detail + content ──
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -70,10 +74,7 @@ const CourseDetailPage = () => {
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.text();
               });
-              if (!cancelled) {
-                setContentText(text);
-                setContentError(null);
-              }
+              if (!cancelled) { setContentText(text); setContentError(null); }
             } catch {
               if (!cancelled) setContentError("正文暂不可读，可能为非公开或跨域受限");
             }
@@ -90,25 +91,14 @@ const CourseDetailPage = () => {
     return () => { cancelled = true; };
   }, [id, tokens?.accessToken]);
 
-  // 图片行宽度计算
-  useEffect(() => {
-    const calc = () => {
-      const el = rowRef.current;
-      if (!el) return;
-      const w = el.clientWidth;
-      setVisibleCount(Math.max(1, Math.floor((w + 12) / 192)));
-    };
-    calc();
-    window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
-  }, [detail?.images]);
-
+  // ── Touch detection ──
   useEffect(() => {
     const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     setIsTouch(touch);
     if (touch) { setShowNavLeft(true); setShowNavRight(true); }
   }, []);
 
+  // ── Preview nav hover zones ──
   const handlePreviewMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isTouch) return;
     const el = previewBoxRef.current;
@@ -130,7 +120,7 @@ const CourseDetailPage = () => {
   const prevImage = () => { if (!detail?.images?.length) return; setPreviewIndex(i => (i - 1 + detail.images.length) % detail.images.length); };
   const nextImage = () => { if (!detail?.images?.length) return; setPreviewIndex(i => (i + 1) % detail.images.length); };
 
-  // RAG: 停止流式
+  // ── RAG: stop stream ──
   const stopRag = () => {
     if (abortControllerRef.current) { abortControllerRef.current.abort(); abortControllerRef.current = null; }
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
@@ -142,7 +132,7 @@ const CourseDetailPage = () => {
     setRagLoading(false);
   };
 
-  // RAG: 启动流式问答（fetchSSE + 自适应打字机）
+  // ── RAG: start stream with typewriter ──
   const startRag = () => {
     if (!id) return;
     const q = ragQuestion.trim();
@@ -184,11 +174,11 @@ const CourseDetailPage = () => {
       onDone: () => { streamDoneRef.current = true; abortControllerRef.current = null; },
       onError: (err) => { streamDoneRef.current = true; abortControllerRef.current = null; setRagError(err.message); },
       signal: controller.signal,
-      accessToken: tokens?.accessToken,
+      accessToken: null,
     });
   };
 
-  // 页面卸载清理
+  // ── Cleanup on unmount ──
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -196,74 +186,118 @@ const CourseDetailPage = () => {
     };
   }, []);
 
-  // 作者信息
+  // ── Derived data ──
   const authorId = detail?.authorId ? Number(detail.authorId) : parseAvatarUserId(detail?.authorAvatar);
   const isSelf = (authorId != null && user?.id === authorId) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
+  const images = detail?.images ?? [];
+  const hasImages = images.length > 0;
+  const publishDate = detail?.publishTime ? new Date(detail.publishTime).toLocaleDateString("zh-CN") : null;
 
   return (
     <AppLayout
       header={<MainHeader headline={detail?.title ?? ""} subtitle="" rightSlot={<AuthStatus />} />}
       variant="cardless"
     >
-      <article className={styles.detailCard}>
-        {error ? <div style={{ color: "var(--color-danger)" }}>{error}</div> : null}
-        {detail?.images?.length ? (
-          <div ref={rowRef} className={styles.imageRow}>
-            {detail.images.slice(0, visibleCount).map((src, idx) => {
-              const isLast = idx === visibleCount - 1 && detail.images.length > visibleCount;
-              return (
-                <div key={src + idx} className={styles.imageItem} onClick={() => openPreview(idx)}>
-                  <img className={styles.image} src={src} alt={detail.title} />
-                  {isLast ? <div className={styles.moreBadge}>+{detail.images.length - visibleCount}</div> : null}
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
+      <article className={styles.article}>
+        {error && <div className={styles.errorText}>{error}</div>}
 
-        <div className={styles.titleBlock}>
-          <div className={styles.meta}>
-            {detail?.authorAvatar ? <img className={styles.authorAvatar} src={detail.authorAvatar} alt={detail.authorNickname} /> : null}
-            <span className={styles.authorName}>{detail?.authorNickname ?? ""}</span>
-            {authorId && !isSelf ? <FollowButton targetUserId={authorId} /> : null}
+        {/* ── Hero Cover ── */}
+        {hasImages && (
+          <div className={styles.hero} onClick={() => openPreview(0)}>
+            <img src={images[0]} className={styles.heroImage} alt={detail?.title} />
+            <div className={styles.heroOverlay}>
+              <h1 className={styles.heroTitle}>{detail?.title}</h1>
+              {detail?.description && <p className={styles.heroDesc}>{detail.description}</p>}
+            </div>
           </div>
-          <div className={styles.tagList}>
-            {(detail?.tags ?? []).map(tag => <Tag key={tag}>#{tag}</Tag>)}
+        )}
+
+        {/* ── Thumbnail Strip (multi-image) ── */}
+        {images.length > 1 && (
+          <div className={styles.thumbStrip}>
+            {images.map((src, idx) => (
+              <div
+                key={src + idx}
+                className={`${styles.thumb} ${previewIndex === idx ? styles.thumbActive : ""}`}
+                onClick={() => openPreview(idx)}
+              >
+                <img src={src} alt={`${detail?.title} ${idx + 1}`} />
+                {idx === images.length - 1 && images.length > 6 && (
+                  <div className={styles.moreBadge}>+{images.length - 6}</div>
+                )}
+              </div>
+            ))}
           </div>
-          <div className={styles.meta}>
-            {detail?.publishTime ? <span>{new Date(detail.publishTime).toLocaleDateString("zh-CN")}</span> : null}
+        )}
+
+        {/* ── Title Card (fallback: no images) ── */}
+        {!hasImages && detail && (
+          <div className={styles.titleCard}>
+            <h1 className={styles.titleCardHeading}>{detail.title}</h1>
+            {detail.description && <p className={styles.titleCardDesc}>{detail.description}</p>}
           </div>
-          <div className={styles.bottomBar}>
-            {detail ? (
+        )}
+
+        {/* ── Author Bar ── */}
+        {detail && (
+          <div className={styles.authorBar}>
+            <div className={styles.authorInfo}>
+              {detail.authorAvatar && (
+                <img className={styles.avatar} src={detail.authorAvatar} alt={detail.authorNickname} />
+              )}
+              <div className={styles.authorMeta}>
+                <span className={styles.authorName}>{detail.authorNickname}</span>
+                {publishDate && <span className={styles.publishDate}>{publishDate}</span>}
+              </div>
+              {authorId && !isSelf && <FollowButton targetUserId={authorId} />}
+            </div>
+            <div className={styles.actions}>
               <LikeFavBar
                 entityId={detail.id}
                 initialCounts={{ like: detail.likeCount ?? 0, fav: detail.favoriteCount ?? 0 }}
                 initialState={{ liked: detail.liked, faved: detail.faved }}
               />
-            ) : null}
+            </div>
           </div>
-        </div>
+        )}
 
-        <SectionHeader title="内容正文" subtitle="" />
+        {/* ── Tags ── */}
+        {detail?.tags?.length ? (
+          <div className={styles.tagRow}>
+            {detail.tags.map(tag => <Tag key={tag}>#{tag}</Tag>)}
+          </div>
+        ) : null}
 
+        {/* ── Description Callout (shown separately when hero already displays title) ── */}
+        {detail?.description && hasImages && (
+          <div className={styles.descCallout}>{detail.description}</div>
+        )}
+
+        {/* ── Content Row: Markdown + RAG Panel ── */}
         <div className={styles.contentRow}>
           <div className={styles.contentMain}>
             <div className={`${styles.body} ${styles.markdown}`}>
               {contentText ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-                  a: ({ node: _n, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
-                  img: ({ node: _n, ...props }) => <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />,
-                }}>{contentText}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                  {contentText}
+                </ReactMarkdown>
               ) : "暂无内容"}
             </div>
-            {contentError ? (
-              <div style={{ color: "var(--color-danger)" }}>
-                {contentError} {detail?.contentUrl ? <a href={detail.contentUrl} target="_blank" rel="noreferrer">查看原文</a> : null}
+            {contentError && (
+              <div className={styles.contentError}>
+                {contentError}
+                {detail?.contentUrl && (
+                  <a href={detail.contentUrl} target="_blank" rel="noreferrer">查看原文</a>
+                )}
               </div>
-            ) : null}
+            )}
           </div>
 
           <aside className={styles.ragPanel}>
+            <div className={styles.ragHeader}>
+              <span className={styles.ragIcon}>✨</span>
+              <span className={styles.ragTitle}>AI 智能问答</span>
+            </div>
             <div className={styles.ragBody}>
               <textarea
                 className={styles.ragTextarea}
@@ -279,14 +313,13 @@ const CourseDetailPage = () => {
                 <button type="button" className={`${styles.ragBtn} ${styles.ragBtnGhost}`} onClick={stopRag} disabled={!ragLoading}>停止</button>
               </div>
               <div className={styles.ragHint}>说明：仅"公开"知文支持问答，答案基于当前知文的索引片段实时生成。</div>
-              {ragError ? <div style={{ color: "var(--color-danger)" }}>{ragError}</div> : null}
+              {ragError && <div className={styles.errorText}>{ragError}</div>}
               <div className={styles.ragAnswer}>
                 {ragAnswer ? (
                   <div className={`${styles.markdown} ${ragLoading ? styles.markdownStreaming : ""}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-                      a: ({ node: _n, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
-                      img: ({ node: _n, ...props }) => <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />,
-                    }}>{ragAnswer}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                      {ragAnswer}
+                    </ReactMarkdown>
                   </div>
                 ) : (
                   <div className={styles.ragPlaceholder}>
@@ -298,20 +331,42 @@ const CourseDetailPage = () => {
           </aside>
         </div>
 
-        {previewOpen && detail?.images?.length ? (
+        {/* ── Image Preview Overlay ── */}
+        {previewOpen && images.length > 0 && (
           <div className={styles.previewOverlay} onClick={() => setPreviewOpen(false)}>
-            <div className={styles.previewBox} ref={previewBoxRef} onMouseMove={handlePreviewMouseMove} onMouseLeave={handlePreviewMouseLeave} onClick={(e) => e.stopPropagation()}>
-              <img className={styles.previewImage} src={detail.images[previewIndex]} alt={detail.title} />
-              <button type="button" className={`${styles.navButton} ${styles.navButtonLeft} ${showNavLeft ? styles.navButtonVisible : ""}`} onClick={(e) => { e.stopPropagation(); prevImage(); }} aria-label="上一张">
+            <div
+              className={styles.previewBox}
+              ref={previewBoxRef}
+              onMouseMove={handlePreviewMouseMove}
+              onMouseLeave={handlePreviewMouseLeave}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img className={styles.previewImage} src={images[previewIndex]} alt={detail?.title} />
+              <button
+                type="button"
+                className={`${styles.navButton} ${styles.navButtonLeft} ${showNavLeft ? styles.navButtonVisible : ""}`}
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                aria-label="上一张"
+              >
                 <ArrowRightIcon width={24} height={24} style={{ transform: "rotate(180deg)" }} />
               </button>
-              <button type="button" className={`${styles.navButton} ${styles.navButtonRight} ${showNavRight ? styles.navButtonVisible : ""}`} onClick={(e) => { e.stopPropagation(); nextImage(); }} aria-label="下一张">
+              <button
+                type="button"
+                className={`${styles.navButton} ${styles.navButtonRight} ${showNavRight ? styles.navButtonVisible : ""}`}
+                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                aria-label="下一张"
+              >
                 <ArrowRightIcon width={24} height={24} />
               </button>
-              <button type="button" className={styles.closeButton} onClick={(e) => { e.stopPropagation(); setPreviewOpen(false); }} aria-label="关闭">✕</button>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={(e) => { e.stopPropagation(); setPreviewOpen(false); }}
+                aria-label="关闭"
+              >✕</button>
             </div>
           </div>
-        ) : null}
+        )}
       </article>
     </AppLayout>
   );
