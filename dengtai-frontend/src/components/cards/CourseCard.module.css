@@ -1,14 +1,13 @@
-/* ── Card Shell ── */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .card a {
@@ -19,12 +18,11 @@
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 138, 65, 0.12);
 }
 
-/* ── Cover Image — full bleed top ── */
 .coverWrap {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -38,11 +36,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s var(--ease-out);
 }
 
 .card:hover .cover {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .playBadge {
@@ -52,15 +50,14 @@
   transform: translate(-50%, -50%);
   width: 40px;
   height: 40px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.92);
   display: grid;
   place-items: center;
   color: var(--color-primary);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Content Area ── */
 .content {
   display: flex;
   flex-direction: column;
@@ -105,7 +102,6 @@
   gap: 5px;
 }
 
-/* ── Meta (Author + Stats) ── */
 .meta {
   margin-top: auto;
   display: flex;
@@ -125,7 +121,7 @@
 .teacherAvatar {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
   background: rgba(255, 107, 53, 0.1);
@@ -138,7 +134,7 @@
 .teacherAvatarImg {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   object-fit: cover;
   display: block;
   flex-shrink: 0;
@@ -192,7 +188,6 @@
   align-items: center;
 }
 
-/* ── Top Badge ── */
 .topBadge {
   position: absolute;
   top: 10px;
@@ -206,20 +201,19 @@
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+  box-shadow: var(--shadow-glow);
 }
 
-/* ── Edit Menu ── */
 .menuButton {
   position: absolute;
   top: 10px;
   right: 10px;
   width: 26px;
   height: 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
   background: rgba(0, 0, 0, 0.4);
@@ -229,6 +223,7 @@
   border: none;
   font-size: 14px;
   line-height: 1;
+  transition: background var(--transition-base);
 }
 
 .menuButton:hover {
@@ -241,8 +236,8 @@
   right: 10px;
   min-width: 150px;
   background: var(--color-surface);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
   padding: 6px;
   z-index: 10;
@@ -257,10 +252,11 @@
   font-size: 13px;
   color: var(--color-text);
   padding: 7px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
   border: none;
   cursor: pointer;
+  transition: background var(--duration-fast) ease;
 }
 
 .menuItem:hover {
@@ -268,10 +264,9 @@
 }
 
 .menuDanger {
-  color: #e53935;
+  color: var(--color-danger);
 }
 
-/* ── No-image fallback layout ── */
 .card:not(:has(.coverWrap)) .content {
   padding-top: 18px;
 }

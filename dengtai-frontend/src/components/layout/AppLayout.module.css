@@ -17,7 +17,6 @@
   min-height: 0;
 }
 
-/* 去除白色卡片包裹，让 HomePage 自己控制布局 */
 .pageCard {
   display: flex;
   flex-direction: column;

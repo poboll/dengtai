@@ -3,14 +3,17 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 60px 24px;
+  padding: 64px 24px;
 }
 
 .card {
   width: min(480px, 100%);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 32px;
-  box-shadow: 0 24px 54px rgba(255, 138, 65, 0.18);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   padding: 48px 42px;
   display: flex;
   flex-direction: column;
@@ -55,19 +58,24 @@
 .input,
 .select {
   border: none;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 14px 18px;
-  background: rgba(255, 249, 240, 0.95);
+  background: var(--color-surface-soft);
   box-shadow: inset 0 0 0 1px rgba(255, 138, 65, 0.16);
   font-size: 15px;
   color: var(--color-text-strong);
+  transition: box-shadow var(--transition-base);
 }
 
-/* 统一下拉样式并防止箭头与文本重叠 */
+.input:focus,
+.select:focus {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 138, 65, 0.5), 0 0 0 3px rgba(255, 138, 65, 0.1);
+  outline: none;
+}
+
 .select {
   -webkit-appearance: none;
   appearance: none;
-  /* 使用主题主色的自定义箭头 */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ff8a41' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
@@ -86,13 +94,18 @@
 
 .codeButton {
   min-width: 120px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 138, 65, 0.22);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--glass-bg);
   color: var(--color-primary-strong);
   font-weight: 600;
   cursor: pointer;
   padding: 0 16px;
+  transition: all var(--transition-base);
+}
+
+.codeButton:hover {
+  background: rgba(255, 138, 65, 0.08);
 }
 
 .codeButton:disabled {
@@ -109,19 +122,20 @@
 .submitButton {
   width: 100%;
   padding: 14px 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: none;
   background: linear-gradient(135deg, #ff9a54 0%, #ff7a22 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 20px 42px rgba(255, 138, 65, 0.28);
-  transition: transform 0.2s ease;
+  box-shadow: var(--shadow-glow-strong);
+  transition: all var(--transition-base);
 }
 
 .submitButton:hover {
   transform: translateY(-1px);
+  box-shadow: 0 12px 32px var(--color-primary-glow);
 }
 
 .submitButton:disabled {
@@ -158,6 +172,7 @@
 .checkboxRow input[type="checkbox"] {
   width: 18px;
   height: 18px;
+  accent-color: var(--color-primary);
 }
 
 .checkboxRow a {
@@ -167,17 +182,17 @@
 
 .error {
   padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(255, 98, 98, 0.12);
-  color: #ff4b4b;
+  border-radius: var(--radius-md);
+  background: rgba(229, 57, 53, 0.08);
+  color: var(--color-danger);
   font-size: 13px;
 }
 
 .success {
   padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(18, 192, 123, 0.12);
-  color: #0f8a5c;
+  border-radius: var(--radius-md);
+  background: rgba(18, 192, 123, 0.1);
+  color: var(--color-success);
   font-size: 13px;
 }
 

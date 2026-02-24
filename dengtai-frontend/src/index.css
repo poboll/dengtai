@@ -7,10 +7,12 @@
   /* ── Brand Colors ── */
   --color-primary: #ff6b35;
   --color-primary-strong: #e85a1f;
+  --color-primary-glow: rgba(255, 107, 53, 0.35);
   --color-secondary: #ffe4d6;
   --color-accent: #ffaa70;
   --color-success: #12c07b;
   --color-info: #4b85f1;
+  --color-danger: #e53935;
 
   /* ── Text ── */
   --color-text-strong: #111111;
@@ -22,16 +24,38 @@
   --color-surface: #ffffff;
   --color-surface-soft: #fdf4ee;
   --color-border: rgba(0, 0, 0, 0.07);
+  --color-border-strong: rgba(0, 0, 0, 0.12);
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-blur: blur(16px) saturate(180%);
 
   /* ── Radius ── */
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
 
   /* ── Shadows ── */
-  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.1);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 4px 20px var(--color-primary-glow);
+  --shadow-glow-strong: 0 8px 32px var(--color-primary-glow);
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 0.15s;
+  --duration-normal: 0.25s;
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ── Layout ── */
   --sidebar-width: 88px;
@@ -57,6 +81,8 @@ body,
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -102,7 +128,7 @@ a {
   margin-left: var(--sidebar-offset);
   flex: 1;
   min-width: 0;
-  padding: 20px 28px 48px;
+  padding: 24px 32px 48px;
   max-width: 1360px;
 }
 
@@ -112,21 +138,23 @@ a {
   align-items: center;
   gap: 6px;
   padding: 8px 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-strong);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--color-text-strong);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-base);
   white-space: nowrap;
 }
 
 .ghost-button:hover {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--color-surface);
+  border-color: rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -135,28 +163,53 @@ a {
   align-items: center;
   gap: 6px;
   padding: 8px 20px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: none;
   background: var(--color-primary);
   color: #fff;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-glow);
   white-space: nowrap;
 }
 
 .primary-button:hover {
   background: var(--color-primary-strong);
-  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
+  box-shadow: var(--shadow-glow-strong);
   transform: translateY(-1px);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(255, 107, 53, 0.18);
+  color: var(--color-text-strong);
 }
 
 /* ── Responsive ── */
 @media (max-width: 1200px) {
   .app-content {
-    padding: 18px 22px 40px;
+    padding: 20px 24px 40px;
   }
 }
 
@@ -167,6 +220,6 @@ a {
 
   .app-content {
     margin-left: 0;
-    padding: 14px 14px 80px;
+    padding: 16px 16px 80px;
   }
 }

@@ -7,19 +7,29 @@
 .item {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
   color: var(--color-text-muted);
+  transition: color var(--transition-base);
 }
 
 .number {
   color: var(--color-text-strong);
   font-weight: 700;
+  font-size: 16px;
 }
 
 .label {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .clickable {
   cursor: pointer;
+}
+
+.clickable:hover {
+  color: var(--color-primary);
+}
+
+.clickable:hover .number {
+  color: var(--color-primary-strong);
 }

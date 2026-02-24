@@ -1,5 +1,3 @@
-/* ===== Sidebar — 全屏高度固定左侧导航 ===== */
-
 .sidebar {
   position: fixed;
   top: 24px;
@@ -11,31 +9,29 @@
   flex-direction: column;
   align-items: center;
   padding: 20px 8px 16px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   box-shadow:
-    0 0 0 1px rgba(255, 138, 65, 0.1),
-    0 4px 24px rgba(255, 122, 34, 0.1),
-    0 16px 48px rgba(26, 26, 44, 0.06);
+    0 0 0 1px rgba(255, 138, 65, 0.08),
+    var(--shadow-lg);
 }
 
-/* Logo 区 */
 .logo {
   width: 48px;
   height: 48px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(145deg, #ffb86b 0%, #ff7a22 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(255, 122, 34, 0.38);
+  box-shadow: var(--shadow-glow);
   flex-shrink: 0;
   margin-bottom: 4px;
 }
 
-/* Nav 占满中间剩余空间 */
 .nav {
   flex: 1;
   display: flex;
@@ -46,7 +42,6 @@
   padding: 8px 0;
 }
 
-/* 每个导航链接 */
 .link {
   position: relative;
   display: flex;
@@ -55,13 +50,12 @@
   gap: 4px;
   padding: 11px 4px 9px;
   color: var(--color-text-muted);
-  border-radius: 16px;
-  transition: color 0.18s ease, background 0.18s ease;
+  border-radius: var(--radius-lg);
+  transition: color var(--transition-base), background var(--transition-base);
   text-decoration: none;
   overflow: hidden;
 }
 
-/* 左侧激活指示条 */
 .link::before {
   content: '';
   position: absolute;
@@ -72,14 +66,14 @@
   height: 0;
   border-radius: 0 2px 2px 0;
   background: var(--color-primary-strong);
-  transition: height 0.2s ease;
+  transition: height var(--transition-base);
 }
 
 .link svg {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  transition: transform 0.18s ease;
+  transition: transform var(--transition-base);
 }
 
 .label {
@@ -113,19 +107,17 @@
   filter: drop-shadow(0 2px 6px rgba(255, 122, 34, 0.35));
 }
 
-/* 弹性撑开 spacer */
 .spacer {
   min-height: 8px;
 }
 
-/* Footer */
 .footer {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 138, 65, 0.14);
+  border-top: 1px solid rgba(255, 138, 65, 0.12);
   width: 100%;
 }
 
@@ -144,7 +136,6 @@
   letter-spacing: 0.02em;
 }
 
-/* ===== 移动端底部栏 ===== */
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;
@@ -159,9 +150,8 @@
     align-items: center;
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     border-radius: 0;
-    border-top: 1px solid rgba(255, 138, 65, 0.12);
+    border-top: 1px solid rgba(255, 138, 65, 0.1);
     box-shadow: 0 -4px 24px rgba(26, 26, 44, 0.08);
-    backdrop-filter: blur(16px);
   }
 
   .logo {
@@ -179,7 +169,7 @@
 
   .link {
     padding: 6px 8px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     flex: 1;
     max-width: 64px;
   }

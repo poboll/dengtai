@@ -1,35 +1,46 @@
 .tabs {
   display: flex;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 20px;
+  gap: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 8px;
+  border-radius: var(--radius-lg);
   width: fit-content;
-  box-shadow: 0 14px 32px rgba(255, 138, 65, 0.12);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
 }
 
 .tabButton {
   padding: 10px 20px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: transparent;
   border: none;
   font-weight: 600;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
+}
+
+.tabButton:hover {
+  color: var(--color-text-strong);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tabActive {
   background: linear-gradient(135deg, #ffac67 0%, #ff7f2c 100%);
   color: #fff;
-  box-shadow: 0 12px 26px rgba(255, 138, 65, 0.28);
+  box-shadow: var(--shadow-glow);
 }
 
 .card {
   padding: 32px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 18px 42px rgba(255, 138, 65, 0.12);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -59,13 +70,20 @@
 .input,
 .textarea {
   padding: 14px 18px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: none;
-  background: rgba(255, 249, 240, 0.9);
+  background: var(--color-surface-soft);
   box-shadow: inset 0 0 0 1px rgba(255, 138, 65, 0.18);
   font-size: 14px;
   color: var(--color-text-strong);
   resize: vertical;
+  transition: box-shadow var(--transition-base);
+}
+
+.input:focus,
+.textarea:focus {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 138, 65, 0.5), 0 0 0 3px rgba(255, 138, 65, 0.1);
+  outline: none;
 }
 
 .textarea {
@@ -75,7 +93,7 @@
 .avatarLarge {
   width: 120px;
   height: 120px;
-  border-radius: 40px;
+  border-radius: var(--radius-xl);
   background: linear-gradient(135deg, #ffcd81 0%, #ff8a41 100%);
   display: grid;
   place-items: center;
@@ -84,7 +102,6 @@
   font-weight: 700;
 }
 
-/* 只读信息布局 */
 .profileGrid {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -95,7 +112,7 @@
 .avatarBox {
   width: 120px;
   height: 120px;
-  border-radius: 40px;
+  border-radius: var(--radius-xl);
   background: linear-gradient(135deg, #ffcd81 0%, #ff8a41 100%);
   display: grid;
   place-items: center;
@@ -135,7 +152,7 @@
   margin-top: 16px;
   color: var(--color-text);
   font-size: 14px;
-  white-space: pre-wrap; /* 保留用户输入的回车换行 */
+  white-space: pre-wrap;
 }
 
 .contentList {
@@ -144,18 +161,25 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .contentItem {
   padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 14px 28px rgba(255, 138, 65, 0.12);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.contentItem:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .contentMeta {
@@ -185,17 +209,27 @@
 
 .smallButton {
   padding: 10px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 138, 65, 0.24);
-  background: rgba(255, 255, 255, 0.86);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 138, 65, 0.2);
+  background: var(--glass-bg);
   font-weight: 600;
   color: var(--color-primary-strong);
   cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.smallButton:hover {
+  background: rgba(255, 138, 65, 0.08);
+  transform: translateY(-1px);
 }
 
 .danger {
-  border-color: rgba(255, 98, 98, 0.32);
-  color: #ff6262;
+  border-color: rgba(229, 57, 53, 0.25);
+  color: var(--color-danger);
+}
+
+.danger:hover {
+  background: rgba(229, 57, 53, 0.06);
 }
 
 @media (max-width: 900px) {

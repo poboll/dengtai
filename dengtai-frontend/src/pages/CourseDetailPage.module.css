@@ -3,18 +3,21 @@
   flex-direction: column;
   gap: 32px;
   padding: 32px;
-  border-radius: 32px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 18px 42px rgba(26, 26, 44, 0.08);
-  position: relative; /* 让预览层仅覆盖卡片区域 */
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
 }
 
 .heroImage {
   width: 100%;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   max-height: 360px;
   object-fit: cover;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 .titleBlock {
@@ -46,7 +49,7 @@
 .authorAvatar {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   object-fit: cover;
 }
 
@@ -74,14 +77,13 @@
 }
 
 .body {
-  background: rgba(255, 248, 238, 0.8);
-  border-radius: 24px;
+  background: rgba(255, 248, 238, 0.6);
+  border-radius: var(--radius-lg);
   padding: 28px;
   line-height: 1.7;
   color: var(--color-text);
 }
 
-/* Markdown 内容样式 */
 .markdown {
   line-height: 1.8;
 }
@@ -101,35 +103,38 @@
 .markdown blockquote {
   margin: 12px 0;
   padding-left: 12px;
-  border-left: 3px solid #ddd;
+  border-left: 3px solid var(--color-border-strong);
   color: var(--color-text-muted);
 }
 
 .markdown img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .markdown pre {
-  background: #f6f8fa;
-  padding: 12px 14px;
-  border-radius: 12px;
+  background: #1a1a2e;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
   overflow: auto;
 }
 
 .markdown code {
-  background: #f6f8fa;
+  background: rgba(255, 138, 65, 0.1);
   padding: 2px 6px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 13px;
+  color: var(--color-primary-strong);
 }
 
 .markdown pre code {
   background: transparent;
   padding: 0;
+  color: #e8e8f0;
 }
 
-/* 横向图片行与预览层 */
 .imageRow {
   display: flex;
   gap: 12px;
@@ -139,11 +144,16 @@
 .imageItem {
   position: relative;
   width: 180px;
-  aspect-ratio: 3 / 4; /* 宽:高 = 3:4 */
-  border-radius: 16px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
+  transition: transform var(--transition-base);
+}
+
+.imageItem:hover {
+  transform: scale(1.02);
 }
 
 .image {
@@ -160,7 +170,7 @@
   color: #fff;
   font-size: 12px;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .previewOverlay {
@@ -169,8 +179,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent; /* 全屏透明：不影响视觉，但可捕获外部点击 */
-  z-index: 1000; /* 屏幕居中并浮于内容之上 */
+  background: transparent;
+  z-index: 1000;
 }
 
 .previewBox {
@@ -182,8 +192,8 @@
 .previewImage {
   max-width: 100%;
   max-height: 80vh;
-  border-radius: 16px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
   object-fit: contain;
 }
 
@@ -194,17 +204,17 @@
   background: rgba(255, 255, 255, 0.85);
   color: var(--color-text);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   cursor: pointer;
-  opacity: 0; /* 默认隐身 */
-  pointer-events: none; /* 隐身时不拦截点击 */
-  transition: opacity 150ms ease;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) ease;
 }
 
 .navButtonLeft { left: 8px; }
@@ -222,14 +232,13 @@
   background: rgba(255, 255, 255, 0.9);
   color: var(--color-text);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   width: 32px;
   height: 32px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
 }
 
-/* RAG 问答侧栏 */
 .ragToggle {
   display: inline-flex;
   align-items: center;
@@ -237,19 +246,28 @@
   background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 8px 14px;
   font-size: 14px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-glow);
   cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.ragToggle:hover {
+  background: var(--color-primary-strong);
+  box-shadow: var(--shadow-glow-strong);
 }
 
 .ragPanel {
   height: 100%;
   width: 420px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 18px 42px rgba(26, 26, 44, 0.12);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -260,7 +278,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .ragTitle {
@@ -275,17 +293,23 @@
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  min-height: 0; /* 允许内部滚动区域正确缩放 */
+  min-height: 0;
 }
 
 .ragTextarea {
   width: 100%;
   min-height: 64px;
   resize: vertical;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 10px 12px;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--color-border);
   outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ragTextarea:focus {
+  border-color: rgba(255, 138, 65, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 138, 65, 0.1);
 }
 
 .ragControls {
@@ -295,31 +319,41 @@
 
 .ragBtn {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
+  transition: all var(--transition-base);
 }
 
 .ragBtnPrimary {
   background: var(--color-primary);
   color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+.ragBtnPrimary:hover {
+  background: var(--color-primary-strong);
 }
 
 .ragBtnGhost {
-  background: #f6f8fa;
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-text);
 }
 
+.ragBtnGhost:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
 .ragHint {
-  color: var(--color-text-disabled, var(--color-text-muted));
-  opacity: 0.7; /* 置灰效果 */
+  color: var(--color-text-muted);
+  opacity: 0.7;
   font-size: 12px;
 }
 
 .ragAnswer {
   margin-top: 6px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(246, 248, 250, 0.8);
   color: var(--color-text);
   line-height: 1.8;
@@ -345,7 +379,6 @@
   color: var(--color-text-muted);
 }
 
-/* 两栏布局：正文 + 问答面板 */
 .contentRow {
   display: grid;
   grid-template-columns: 1fr 420px;
