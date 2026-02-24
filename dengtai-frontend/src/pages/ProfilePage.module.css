@@ -28,7 +28,7 @@
 }
 
 .tabActive {
-  background: linear-gradient(135deg, #ffac67 0%, #ff7f2c 100%);
+  background: linear-gradient(135deg, #8fa8c2 0%, #4a6f94 100%);
   color: #fff;
   box-shadow: var(--shadow-glow);
 }
@@ -73,7 +73,7 @@
   border-radius: var(--radius-lg);
   border: none;
   background: var(--color-surface-soft);
-  box-shadow: inset 0 0 0 1px rgba(255, 138, 65, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(74, 111, 148, 0.12);
   font-size: 14px;
   color: var(--color-text-strong);
   resize: vertical;
@@ -82,7 +82,7 @@
 
 .input:focus,
 .textarea:focus {
-  box-shadow: inset 0 0 0 1.5px rgba(255, 138, 65, 0.5), 0 0 0 3px rgba(255, 138, 65, 0.1);
+  box-shadow: inset 0 0 0 1.5px rgba(74, 111, 148, 0.38), 0 0 0 3px rgba(74, 111, 148, 0.08);
   outline: none;
 }
 
@@ -94,7 +94,7 @@
   width: 120px;
   height: 120px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, #ffcd81 0%, #ff8a41 100%);
+  background: linear-gradient(135deg, #b4c8d8 0%, #6b8caf 100%);
   display: grid;
   place-items: center;
   color: #fff;
@@ -113,7 +113,7 @@
   width: 120px;
   height: 120px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, #ffcd81 0%, #ff8a41 100%);
+  background: linear-gradient(135deg, #b4c8d8 0%, #6b8caf 100%);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -210,7 +210,7 @@
 .smallButton {
   padding: 10px 16px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 138, 65, 0.2);
+  border: 1px solid rgba(74, 111, 148, 0.14);
   background: var(--glass-bg);
   font-weight: 600;
   color: var(--color-primary-strong);
@@ -219,7 +219,7 @@
 }
 
 .smallButton:hover {
-  background: rgba(255, 138, 65, 0.08);
+  background: rgba(74, 111, 148, 0.06);
   transform: translateY(-1px);
 }
 

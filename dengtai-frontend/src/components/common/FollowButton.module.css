@@ -4,7 +4,7 @@
   gap: 8px;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 138, 65, 0.24);
+  border: 1px solid rgba(74, 111, 148, 0.16);
   background: rgba(255, 255, 255, 0.9);
   color: var(--color-text-strong);
   font-size: 13px;
@@ -20,8 +20,8 @@
 
 .following {
   color: var(--color-primary-strong);
-  border-color: rgba(255, 138, 65, 0.36);
-  background: rgba(255, 248, 238, 0.8);
+  border-color: rgba(74, 111, 148, 0.28);
+  background: rgba(240, 242, 245, 0.8);
 }
 
 .mutualBadge {

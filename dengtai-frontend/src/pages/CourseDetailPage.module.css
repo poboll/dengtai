@@ -77,7 +77,7 @@
 }
 
 .body {
-  background: rgba(255, 248, 238, 0.6);
+  background: rgba(240, 242, 245, 0.6);
   border-radius: var(--radius-lg);
   padding: 28px;
   line-height: 1.7;
@@ -114,14 +114,14 @@
 }
 
 .markdown pre {
-  background: #1a1a2e;
+  background: #1e2a3a;
   padding: 14px 16px;
   border-radius: var(--radius-md);
   overflow: auto;
 }
 
 .markdown code {
-  background: rgba(255, 138, 65, 0.1);
+  background: rgba(74, 111, 148, 0.08);
   padding: 2px 6px;
   border-radius: var(--radius-xs);
   font-family: "JetBrains Mono", "Fira Code", monospace;
@@ -132,7 +132,7 @@
 .markdown pre code {
   background: transparent;
   padding: 0;
-  color: #e8e8f0;
+  color: #d4dce8;
 }
 
 .imageRow {
@@ -308,8 +308,8 @@
 }
 
 .ragTextarea:focus {
-  border-color: rgba(255, 138, 65, 0.5);
-  box-shadow: 0 0 0 3px rgba(255, 138, 65, 0.1);
+  border-color: rgba(74, 111, 148, 0.38);
+  box-shadow: 0 0 0 3px rgba(74, 111, 148, 0.08);
 }
 
 .ragControls {
@@ -354,7 +354,7 @@
   margin-top: 6px;
   padding: 12px;
   border-radius: var(--radius-md);
-  background: rgba(246, 248, 250, 0.8);
+  background: rgba(240, 242, 245, 0.8);
   color: var(--color-text);
   line-height: 1.8;
   flex: 1;
@@ -363,7 +363,7 @@
 }
 
 .markdownStreaming::after {
-  content: "▋";
+  content: "\25CB";
   display: inline;
   animation: blink 0.6s steps(2, start) infinite;
   color: var(--color-primary);

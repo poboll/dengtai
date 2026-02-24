@@ -18,7 +18,7 @@
   width: 72px;
   height: 72px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, #ffcd81 0%, #ff9a54 100%);
+  background: linear-gradient(135deg, #b4c8d8 0%, #8fa8c2 100%);
   display: grid;
   place-items: center;
   color: #fff;
