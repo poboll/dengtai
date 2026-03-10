@@ -45,9 +45,24 @@ function newSession(): Session {
   };
 }
 
+const STORAGE_KEY = 'dengtai-ai-sessions';
+const ACTIVE_KEY = 'dengtai-ai-active-session';
 const AiAssistantPage = () => {
-  const [sessions, setSessions] = useState<Session[]>(() => [newSession()]);
-  const [activeId, setActiveId] = useState<string>(() => sessions[0].id);
+  const [sessions, setSessions] = useState<Session[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch { /* corrupted data — reset */ }
+    return [newSession()];
+  });
+  const [activeId, setActiveId] = useState<string>(() => {
+    const saved = localStorage.getItem(ACTIVE_KEY);
+    if (saved && sessions.some(s => s.id === saved)) return saved;
+    return sessions[0]?.id ?? '';
+  });
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,6 +84,21 @@ const AiAssistantPage = () => {
     scrollToBottom();
   }, [activeSession.messages, scrollToBottom]);
 
+  // localStorage 持久化
+  useEffect(() => {
+    const toSave = sessions.map(s => ({
+      ...s,
+      messages: s.messages.filter(m => m.id !== 'welcome').length === 0
+        ? s.messages
+        : s.messages.map(m => ({ ...m, streaming: undefined })),
+    }));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)); } catch { /* quota exceeded */ }
+  }, [sessions]);
+
+  useEffect(() => {
+    localStorage.setItem(ACTIVE_KEY, activeId);
+  }, [activeId]);
+
   const updateSession = useCallback((id: string, updater: (s: Session) => Session) => {
     setSessions((prev) => prev.map((s) => (s.id === id ? updater(s) : s)));
   }, []);
@@ -79,6 +109,19 @@ const AiAssistantPage = () => {
     setActiveId(s.id);
     setInput("");
   }, []);
+  const handleDeleteSession = useCallback((e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    setSessions(prev => {
+      const filtered = prev.filter(s => s.id !== sessionId);
+      if (filtered.length === 0) {
+        const s = newSession();
+        setActiveId(s.id);
+        return [s];
+      }
+      if (sessionId === activeId) setActiveId(filtered[0].id);
+      return filtered;
+    });
+  }, [activeId]);
 
   const handleSend = useCallback(async () => {
     const q = input.trim();
@@ -181,7 +224,7 @@ const AiAssistantPage = () => {
           </button>
           <ul className={styles.sessionList}>
             {sessions.map((s) => (
-              <li key={s.id}>
+              <li key={s.id} className={styles.sessionRow}>
                 <button
                   type="button"
                   className={`${styles.sessionItem} ${s.id === activeId ? styles.sessionActive : ""}`}
@@ -189,6 +232,15 @@ const AiAssistantPage = () => {
                   title={s.title}
                 >
                   <span className={styles.sessionTitle}>{s.title}</span>
+                </button>
+                <button
+                  type="button"
+                  className={styles.deleteBtn}
+                  onClick={(e) => handleDeleteSession(e, s.id)}
+                  aria-label="删除会话"
+                  title="删除会话"
+                >
+                  ×
                 </button>
               </li>
             ))}
