@@ -152,6 +152,29 @@
   width: 100%;
 }
 
+.adminLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+  transition: color var(--transition-base), background var(--transition-base);
+  text-decoration: none;
+}
+
+.adminLink:hover {
+  color: var(--color-primary-strong);
+  background: rgba(74, 111, 148, 0.08);
+}
+
+.adminLinkActive {
+  color: var(--color-primary-strong);
+  background: rgba(74, 111, 148, 0.10);
+}
+
 .footerBrand {
   color: var(--color-primary-strong);
   font-weight: 700;
