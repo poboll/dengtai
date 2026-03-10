@@ -9,6 +9,7 @@ import CourseDetailPage from "./pages/CourseDetailPage";
 import AiAssistantPage from "./pages/AiAssistantPage";
 import AboutPage from "./pages/AboutPage";
 import StatusPage from "./pages/StatusPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/post/:id" element={<CourseDetailPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/status" element={<StatusPage />} />
+      <Route path="/admin" element={<AdminDashboardPage />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

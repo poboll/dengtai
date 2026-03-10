@@ -11,6 +11,15 @@ const navItems = [
   { to: "/profile", label: "我的", Icon: ProfileIcon },
 ] as const;
 
+const AdminIcon = () => (
+  <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </svg>
+);
+
 const Sidebar = () => {
   return (
     <aside className={styles.sidebar}>
@@ -34,6 +43,15 @@ const Sidebar = () => {
       </nav>
       <div className={styles.spacer} />
       <div className={styles.footer}>
+        <NavLink
+          to="/admin"
+          className={({ isActive }) =>
+            isActive ? `${styles.adminLink} ${styles.adminLinkActive}` : styles.adminLink
+          }
+          title="运维中枢"
+        >
+          <AdminIcon />
+        </NavLink>
         <Link to="/about" className={styles.footerLink}>
           <span className={styles.footerBrand}>灯塔</span>
           <div className={styles.footerSlogan}>以知识为光</div>
